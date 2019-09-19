@@ -1,5 +1,6 @@
 #include "Header.h"
 #include "Shader.h"
+#include "stb_image.h"
 
 int main()
 {
@@ -34,11 +35,11 @@ int main()
 	//Shape coordinates
 	float vertices[] =
 	{
-		//Position				//Color
-		 0.5f,  0.5f, 0.0f,		1.0f, 0.0f, 0.0f, // top right
-		 0.5f, -0.5f, 0.0f,		1.0f, 0.0f, 0.0f, // bottom right
-		-0.5f, -0.5f, 0.0f,		0.0f, 1.0f, 0.0f,// bottom left
-		-0.5f,  0.5f, 0.0f,		0.0f, 0.5f, 0.5f,// top left 
+		//Position				//Color					// texture coords
+		 0.5f,  0.5f, 0.0f,		1.0f, 0.0f, 0.0f,		0.0f, 0.0f, // top right
+		 0.5f, -0.5f, 0.0f,		0.0f, 1.0f, 0.0f,		0.0f, 1.0f, // bottom right
+		-0.5f, -0.5f, 0.0f,		0.0f, 0.0f, 1.0f,		1.0f, 1.0f, // bottom left
+		-0.5f,  0.5f, 0.0f,		1.0f, 1.0f, 0.0f,		1.0f, 0.0f  // top left 
 	};
 
 	unsigned int indices[] = 
@@ -65,12 +66,46 @@ int main()
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
 	//Position attribute
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid*)0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
 	glEnableVertexAttribArray(0);
 
 	//Color attribute
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
 	glEnableVertexAttribArray(1);
+
+	//Texture coord attribute
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+	glEnableVertexAttribArray(2);
+
+	//Load and create a texture 
+	unsigned int texture;
+	//Load image, create texture and generate mipmaps
+	int width, height, nrChannels;
+
+	glGenTextures(1, &texture);
+	//All upcoming GL_TEXTURE_2D operations now have effect on this texture object
+	glBindTexture(GL_TEXTURE_2D, texture);
+
+	//Set the texture wrapping parameters
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+	//Set texture filtering parameters
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	
+	unsigned char* data = stbi_load("doge.jpg", &width, &height, &nrChannels, 0);
+	if (data)
+	{
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+		glGenerateMipmap(GL_TEXTURE_2D);
+	}
+	else
+	{
+		std::cout << "Failed to load texture" << std::endl;
+	}
+	//Free image data
+	stbi_image_free(data);
 
 	// Render loop
 	while (!glfwWindowShouldClose(window))
