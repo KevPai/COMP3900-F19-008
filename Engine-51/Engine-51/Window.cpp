@@ -124,7 +124,7 @@ int main()
 		//Handles position of objection relative to window
 		transform = glm::translate(transform, glm::vec3(0.0f, 0.0f, 0.0f));
 		//Handles rotation of object, speed then axis
-		transform = glm::rotate(transform, (GLfloat)glfwGetTime(), glm::vec3(0.0f, 0.0f, 1.0f));
+		transform = glm::rotate(transform, (GLfloat)glfwGetTime() * 3.0f, glm::vec3(0.0f, 0.0f, -1.0f));
 
 		GLint transformLocation = glGetUniformLocation(myShader.Program, "transform");
 		glUniformMatrix4fv(transformLocation, 1, GL_FALSE, glm::value_ptr(transform));
