@@ -120,14 +120,40 @@ int main()
 		//Use shader and vertex array
 		myShader.Use();
 
+		//A virtual camera to see 3D objects
+		glm::mat4 projection = glm::mat4(1.0f);
+		//Handles field of view, aspect ratio, 'near-clipping plane', and 'far-clipping plane'
+		projection = glm::perspective(glm::radians(45.0f), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
+		
+		//Rotates the model
+		glm::mat4 model = glm::mat4(1.0f);
+		model = glm::rotate(model, glm::radians(-55.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+
+		//Moves the view
+		glm::mat4 view = glm::mat4(1.0f);
+		view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
+
 		glm::mat4 transform = glm::mat4(1.0f);
 		//Handles position of objection relative to window
 		transform = glm::translate(transform, glm::vec3(0.0f, 0.0f, 0.0f));
 		//Handles rotation of object, speed then axis
 		transform = glm::rotate(transform, (GLfloat)glfwGetTime() * 3.0f, glm::vec3(0.0f, 0.0f, -1.0f));
 
+
+		//Gets the locations of out matrixes
+		unsigned int modelLoc = glGetUniformLocation(myShader.Program, "model");
+		unsigned int viewLoc = glGetUniformLocation(myShader.Program, "view");
+		//Pass to shader
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		glUniformMatrix4fv(viewLoc, 1, GL_FALSE, &view[0][0]);
+
+		//Sets projection onto shader
+		myShader.setMat4("projection", projection);
+
+		/*	Old transformation
 		GLint transformLocation = glGetUniformLocation(myShader.Program, "transform");
 		glUniformMatrix4fv(transformLocation, 1, GL_FALSE, glm::value_ptr(transform));
+		*/
 
 		glBindVertexArray(VAO);
 		//Draw object
