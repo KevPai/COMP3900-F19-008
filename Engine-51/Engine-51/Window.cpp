@@ -120,6 +120,15 @@ int main()
 		//Use shader and vertex array
 		myShader.Use();
 
+		glm::mat4 transform = glm::mat4(1.0f);
+		//Handles position of objection relative to window
+		transform = glm::translate(transform, glm::vec3(0.0f, 0.0f, 0.0f));
+		//Handles rotation of object, speed then axis
+		transform = glm::rotate(transform, (GLfloat)glfwGetTime(), glm::vec3(0.0f, 0.0f, 1.0f));
+
+		GLint transformLocation = glGetUniformLocation(myShader.Program, "transform");
+		glUniformMatrix4fv(transformLocation, 1, GL_FALSE, glm::value_ptr(transform));
+
 		glBindVertexArray(VAO);
 		//Draw object
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
