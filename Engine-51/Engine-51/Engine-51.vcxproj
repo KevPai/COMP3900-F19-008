@@ -128,6 +128,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Cube.cpp" />
     <ClCompile Include="glad.c" />
     <ClCompile Include="Input.cpp" />
     <ClCompile Include="stb_image.cpp" />

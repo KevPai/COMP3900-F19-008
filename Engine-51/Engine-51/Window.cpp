@@ -81,18 +81,23 @@ int main()
 	-0.5f,  0.5f, -0.5f,  0.0f, 1.0f
 	};
 
-	/*unsigned int indices[] = 
-	{
-		0, 1, 3, //First Triangle
-		1, 2, 3, //Second Triangle
-	};*/
+	glm::vec3 cubePositions[] = {
+		glm::vec3(0.0f,  0.0f,  0.0f),
+		glm::vec3(2.0f,  5.0f, -15.0f),
+		glm::vec3(-1.5f, -2.2f, -2.5f),
+		glm::vec3(-3.8f, -2.0f, -12.3f),
+		glm::vec3(2.4f, -0.4f, -3.5f),
+		glm::vec3(-1.7f,  3.0f, -7.5f),
+		glm::vec3(1.3f, -2.0f, -2.5f),
+		glm::vec3(1.5f,  2.0f, -2.5f),
+		glm::vec3(1.5f,  0.2f, -1.5f),
+		glm::vec3(-1.3f,  1.0f, -1.5f)
+	};
 
 	//Vertex buffer object AND vertex array object
 	unsigned int VBO, VAO;
-		//EBO;
 	glGenVertexArrays(1, &VAO);
 	glGenBuffers(1, &VBO);
-	//glGenBuffers(1, &EBO);
 
 	//Bind vertex
 	glBindVertexArray(VAO);
@@ -100,20 +105,10 @@ int main()
 	//Bind buffer
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-	
-	/*//Bind indicies
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);*/
 
 	//Position attribute
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
 	glEnableVertexAttribArray(0);
-
-	/*
-	//Color attribute
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(6 * sizeof(float)));
-	glEnableVertexAttribArray(1);
-	*/
 
 	//Texture coord attribute
 	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
@@ -152,9 +147,6 @@ int main()
 	// Render loop
 	while (!glfwWindowShouldClose(window))
 	{
-		// Checks inputs
-		processInput(window);
-
 		// Rendering...
 		glClearColor(0.0f, 0.0f, 0.0f, 0.0f); //Window color
 		glClear(GL_COLOR_BUFFER_BIT);
@@ -170,18 +162,15 @@ int main()
 		//Handles field of view, aspect ratio, 'near-clipping plane', and 'far-clipping plane'
 		projection = glm::perspective(glm::radians(45.0f), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
 		
-		//Rotates the model
+		//Initialize the model
 		glm::mat4 model = glm::mat4(1.0f);
-		//glfwGetTime lets model continue spinning
-		model = glm::rotate(model, (float)glfwGetTime() * glm::radians(50.0f), 
-			glm::vec3(0.5f, 1.0f, 0.0f));
 
 		//Moves the view
 		glm::mat4 view = glm::mat4(1.0f);
-		view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
+		view = glm::translate(view, glm::vec3(0.0f, 0.0f, -5.0f));
 
 		glm::mat4 transform = glm::mat4(1.0f);
-		//Handles position of objection relative to window
+		//Handles position of object relative to window
 		transform = glm::translate(transform, glm::vec3(0.0f, 0.0f, 0.0f));
 		//Handles rotation of object, speed then axis
 		transform = glm::rotate(transform, (GLfloat)glfwGetTime() * 3.0f, glm::vec3(0.0f, 0.0f, -1.0f));
@@ -196,15 +185,33 @@ int main()
 		//Sets projection onto shader
 		myShader.setMat4("projection", projection);
 
-		/*	Old transformation
-		GLint transformLocation = glGetUniformLocation(myShader.Program, "transform");
-		glUniformMatrix4fv(transformLocation, 1, GL_FALSE, glm::value_ptr(transform));
-		*/
-
 		glBindVertexArray(VAO);
-		//Draw object
-		//glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+		
+		model = glm::mat4(1.0f);
+		//Set initial position
+		model = glm::translate(model, glm::vec3(1.5f, 0.0f, 0.0f));
+		//Rotate models by an angle
+		float angle = 20.0f;
+		model = glm::rotate(model, glm::radians(angle), glm::vec3(-50.0f, 0.0f, 0.0f));
+		//Move model towards the left (multiplying time speeds up movement)
+		model = glm::translate(model, (float)glfwGetTime() * glm::vec3(-1.0f, 0.0f, 0.0f));
+		//Set shaders and draw
+		myShader.setMat4("model", model);
 		glDrawArrays(GL_TRIANGLES, 0, 36);
+
+		model = glm::mat4(1.0f);
+		//Set initial position
+		model = glm::translate(model, glm::vec3(-1.5f, 0.0f, 0.0f));
+		//Rotate models by an angle
+		model = glm::rotate(model, glm::radians(angle), glm::vec3(50.0f, 0.0f, 0.0f));
+		//Move model towards the right (multiplying time speeds up movement)
+		model = glm::translate(model, (float)glfwGetTime() * glm::vec3(1.0f, 0.0f, 0.0f));
+		//Set shaders and draw
+		myShader.setMat4("model", model);
+		glDrawArrays(GL_TRIANGLES, 0, 36);
+
+		// Checks inputs
+		processInput(window);
 
 		// GLFW: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
 		glfwSwapBuffers(window);
