@@ -94,6 +94,12 @@ int main()
 		glm::vec3(-1.3f,  1.0f, -1.5f)
 	};
 
+	//Holds position of object
+	glm::vec3 position(0.0f);
+
+	//Holds rotation of object
+	glm::vec3 rotation(0.0f);
+
 	//Vertex buffer object AND vertex array object
 	unsigned int VBO, VAO;
 	glGenVertexArrays(1, &VAO);
@@ -147,6 +153,9 @@ int main()
 	// Render loop
 	while (!glfwWindowShouldClose(window))
 	{
+		// Checks inputs
+		processInput(window, position, rotation);
+
 		// Rendering...
 		glClearColor(0.0f, 0.0f, 0.0f, 0.0f); //Window color
 		glClear(GL_COLOR_BUFFER_BIT);
@@ -186,32 +195,16 @@ int main()
 		myShader.setMat4("projection", projection);
 
 		glBindVertexArray(VAO);
-		
-		model = glm::mat4(1.0f);
-		//Set initial position
-		model = glm::translate(model, glm::vec3(1.5f, 0.0f, 0.0f));
-		//Rotate models by an angle
-		float angle = 20.0f;
-		model = glm::rotate(model, glm::radians(angle), glm::vec3(-50.0f, 0.0f, 0.0f));
-		//Move model towards the left (multiplying time speeds up movement)
-		model = glm::translate(model, (float)glfwGetTime() * glm::vec3(-1.0f, 0.0f, 0.0f));
-		//Set shaders and draw
-		myShader.setMat4("model", model);
-		glDrawArrays(GL_TRIANGLES, 0, 36);
 
 		model = glm::mat4(1.0f);
 		//Set initial position
-		model = glm::translate(model, glm::vec3(-1.5f, 0.0f, 0.0f));
+		model = glm::translate(model, position);
 		//Rotate models by an angle
-		model = glm::rotate(model, glm::radians(angle), glm::vec3(50.0f, 0.0f, 0.0f));
-		//Move model towards the right (multiplying time speeds up movement)
-		model = glm::translate(model, (float)glfwGetTime() * glm::vec3(1.0f, 0.0f, 0.0f));
+		model = glm::rotate(model, glm::radians(rotation.x), glm::vec3(1.0f, 0.0f, 0.0f));
+		model = glm::rotate(model, glm::radians(rotation.y), glm::vec3(0.0f, 1.0f, 0.0f));
 		//Set shaders and draw
 		myShader.setMat4("model", model);
 		glDrawArrays(GL_TRIANGLES, 0, 36);
-
-		// Checks inputs
-		processInput(window);
 
 		// GLFW: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
 		glfwSwapBuffers(window);
@@ -221,7 +214,6 @@ int main()
 	//Clean up objects
 	glDeleteVertexArrays(1, &VAO);
 	glDeleteBuffers(1, &VBO);
-	//glDeleteBuffers(1, &EBO);
 
 	//Clean out GFLW on close
 	glfwTerminate();
