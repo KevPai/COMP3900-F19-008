@@ -1,6 +1,9 @@
 #include "Header.h"
 #include "Shader.h"
 #include "stb_image.h"
+#include "Camera.h"
+
+Camera camera(glm::vec3(0.0f, 0.0f, 0.0f));
 
 int main()
 {
@@ -81,11 +84,27 @@ int main()
 	-0.5f,  0.5f, -0.5f,  0.0f, 1.0f
 	};
 
+	glm::vec3 cubePositions[] = 
+	{
+	 glm::vec3(-1.0f, 0.0f, 1.0f),
+	 glm::vec3(-3.0f, 0.0f, 2.0f),
+	 glm::vec3(-2.0f, 0.0f, 4.0f),
+	 glm::vec3(0.0f, 0.0f, 6.0f),
+	 glm::vec3(-3.0f, 0.0f, 7.0f),
+	 glm::vec3(-1.0f, 0.0f, 8.0f),
+	 glm::vec3(2.0f, 0.0f, 0.0f),
+	 glm::vec3(2.0f, 0.0f, 5.0f),
+	 glm::vec3(3.0f, 0.0f, 3.0f),
+	 glm::vec3(2.0f, 0.0f, 8.0f)
+	};
+
 	//Holds position of object
 	glm::vec3 position(0.0f);
 
 	//Holds rotation of object
 	glm::vec3 rotation(0.0f);
+
+	glm::vec3 camPosition = glm::vec3(0.0f, 0.0f, -3.0f);
 
 	//Vertex buffer object AND vertex array object
 	unsigned int VBO, VAO;
@@ -141,7 +160,7 @@ int main()
 	while (!glfwWindowShouldClose(window))
 	{
 		// Checks inputs
-		processInput(window, position, rotation);
+		processInput(window, position, rotation, camPosition);
 
 		// Rendering...
 		glClearColor(0.0f, 0.0f, 0.0f, 0.0f); //Window color
@@ -162,9 +181,10 @@ int main()
 		glm::mat4 model = glm::mat4(1.0f);
 
 		//Moves the view
-		glm::mat4 view = glm::mat4(1.0f);
-		view = glm::translate(view, glm::vec3(0.0f, 0.0f, -5.0f));
-		view = glm::rotate(view, 0.3f, glm::vec3(1.0f, 0.0f, 0.0f));
+		glm::mat4 view;
+		view = camera.GetViewMatrix();
+		view = glm::translate(view, camPosition);
+		//view = glm::rotate(view, 0.3f, glm::vec3(1.0f, 0.0f, 0.0f));
 
 		glm::mat4 transform = glm::mat4(1.0f);
 		//Handles position of object relative to window
@@ -192,6 +212,17 @@ int main()
 		//Set shaders and draw
 		myShader.setMat4("model", model);
 		glDrawArrays(GL_TRIANGLES, 0, 36);
+
+		for (unsigned int i = 0; i < 10; i++)
+		{
+			glm::mat4 model = glm::mat4(1.0f);
+			model = glm::translate(model, cubePositions[i]);
+			//float angle = 20.0f * i;
+			//model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
+			myShader.setMat4("model", model);
+
+			glDrawArrays(GL_TRIANGLES, 0, 36);
+		}
 
 		// GLFW: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
 		glfwSwapBuffers(window);

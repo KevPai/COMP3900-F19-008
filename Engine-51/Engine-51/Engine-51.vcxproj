@@ -134,6 +134,7 @@
     <ClCompile Include="Window.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Camera.h" />
     <ClInclude Include="Header.h" />
     <ClInclude Include="Shader.h" />
   </ItemGroup>
