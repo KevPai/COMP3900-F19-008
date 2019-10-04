@@ -1,2 +1,4 @@
-﻿  Source.cpp
-  server.vcxproj -> C:\Users\jayrr\source\repos\server\Debug\server.exe
+﻿  server.cpp
+C:\Users\jayrr\source\repos\COMP3900-F19-008\server\server\server.cpp(128,20): warning C4018:  '<': signed/unsigned mismatch
+C:\Users\jayrr\source\repos\COMP3900-F19-008\server\server\server.cpp(14): warning C4715:  'get_Input_Message': not all control paths return a value
+  server.vcxproj -> C:\Users\jayrr\source\repos\COMP3900-F19-008\server\Debug\server.exe
