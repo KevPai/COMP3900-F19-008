@@ -2,6 +2,7 @@
 #include "Shader.h"
 #include "stb_image.h"
 #include "Camera.h"
+#include "Cube.h"
 
 Camera camera(glm::vec3(0.0f, 0.0f, 0.0f));
 
@@ -104,6 +105,7 @@ int main()
 	//Holds rotation of object
 	glm::vec3 rotation(0.0f);
 
+	//Holds camera position
 	glm::vec3 camPosition = glm::vec3(0.0f, 0.0f, -3.0f);
 
 	//Vertex buffer object AND vertex array object
@@ -178,7 +180,8 @@ int main()
 		projection = glm::perspective(glm::radians(45.0f), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
 		
 		//Initialize the model
-		glm::mat4 model = glm::mat4(1.0f);
+		//glm::mat4 model = glm::mat4(1.0f);
+		Cube cube1;
 
 		//Moves the view
 		glm::mat4 view;
@@ -196,7 +199,7 @@ int main()
 		unsigned int modelLoc = glGetUniformLocation(myShader.Program, "model");
 		unsigned int viewLoc = glGetUniformLocation(myShader.Program, "view");
 		//Pass to shader
-		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(cube1.getModel()));
 		glUniformMatrix4fv(viewLoc, 1, GL_FALSE, &view[0][0]);
 
 		//Sets projection onto shader
@@ -204,22 +207,22 @@ int main()
 
 		glBindVertexArray(VAO);
 
-		model = glm::mat4(1.0f);
+		//model = glm::mat4(1.0f);
 		//Set initial position
-		model = glm::translate(model, position);
+		cube1.move(position);
 		//Rotate models by an angle
-		model = glm::rotate(model, glm::radians(rotation.y), glm::vec3(0.0f, 1.0f, 0.0f));
+		cube1.rotate(rotation, glm::vec3(0.0f, 1.0f, 0.0f));
 		//Set shaders and draw
-		myShader.setMat4("model", model);
+		myShader.setMat4("model", cube1.getModel());
 		glDrawArrays(GL_TRIANGLES, 0, 36);
 
+		Cube cubes[10];
 		for (unsigned int i = 0; i < 10; i++)
 		{
-			glm::mat4 model = glm::mat4(1.0f);
-			model = glm::translate(model, cubePositions[i]);
+			cubes[i].move(cubePositions[i]);
 			//float angle = 20.0f * i;
 			//model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
-			myShader.setMat4("model", model);
+			myShader.setMat4("model", cubes[i].getModel());
 
 			glDrawArrays(GL_TRIANGLES, 0, 36);
 		}
