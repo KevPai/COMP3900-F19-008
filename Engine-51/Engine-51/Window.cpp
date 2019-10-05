@@ -136,6 +136,7 @@ int main()
 
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
@@ -177,12 +178,6 @@ int main()
 		projection = glm::perspective(glm::radians(45.0f), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);		
 		view = camera.GetViewMatrix();
 		view = glm::translate(view, camPosition);
-
-		/*glm::mat4 transform = glm::mat4(1.0f);
-		//Handles position of object relative to window
-		transform = glm::translate(transform, glm::vec3(0.0f, 0.0f, 0.0f));
-		//Handles rotation of object, speed then axis
-		transform = glm::rotate(transform, (GLfloat)glfwGetTime() * 3.0f, glm::vec3(0.0f, 0.0f, -1.0f));*/
 
 		//Gets the locations of out matrixes
 		unsigned int modelLoc = glGetUniformLocation(myShader.Program, "model");
