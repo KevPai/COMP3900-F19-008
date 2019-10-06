@@ -4,7 +4,7 @@
 #pragma  comment (lib, "ws2_32.lib")
 
 using namespace std;
-
+/*
 int main(int argc, char* argv[]) { // we can pass in command line values
 
 	//startup up winsock
@@ -16,14 +16,14 @@ int main(int argc, char* argv[]) { // we can pass in command line values
 		cout << "Cant Start Winsock" << wsOK;
 		return 1;
 	}
-
+	
 	//create a hint structure for the server
 	sockaddr_in serverHint;
 	serverHint.sin_addr.S_un.S_addr = htonl(INADDR_ANY);
 	serverHint.sin_family = AF_INET;
 	serverHint.sin_port = htons(5000);
 
-	inet_pton(AF_INET, "142.232.49.61", &serverHint.sin_addr);
+	inet_pton(AF_INET, "192.168.1.75", &serverHint.sin_addr);
 
 	//socket creation
 	SOCKET out = socket(AF_INET, SOCK_DGRAM, 0);
@@ -33,7 +33,7 @@ int main(int argc, char* argv[]) { // we can pass in command line values
 	if (sendOK == SOCKET_ERROR) {
 		cout << "THAT DIDNT ORK" << WSAGetLastError() << endl;
 		return 1;
-	}*/
+	}
 
 	//memory for server info
 	sockaddr_in server;
@@ -58,3 +58,6 @@ int main(int argc, char* argv[]) { // we can pass in command line values
 	WSACleanup();
 	return 0;
 }
+
+*/
+
