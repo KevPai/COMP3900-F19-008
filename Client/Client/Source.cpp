@@ -4,7 +4,7 @@
 #pragma  comment (lib, "ws2_32.lib")
 
 using namespace std;
-
+/*
 int main(int argc, char* argv[]) { // we can pass in command line values
 
 	//startup up winsock
@@ -33,7 +33,7 @@ int main(int argc, char* argv[]) { // we can pass in command line values
 	if (sendOK == SOCKET_ERROR) {
 		cout << "THAT DIDNT ORK" << WSAGetLastError() << endl;
 		return 1;
-	}*/
+	}
 
 	//memory for server info
 	sockaddr_in server;
@@ -59,5 +59,5 @@ int main(int argc, char* argv[]) { // we can pass in command line values
 	return 0;
 }
 
-
+*/
 

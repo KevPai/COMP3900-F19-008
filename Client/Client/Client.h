@@ -21,13 +21,14 @@ public:
 	void runClient();
 	void updateReceive();
 	void updateSend();
-	void sendMessage(string message, sockaddr_in receiver);
+	void sendMessage(string message, sockaddr_in dest);
 	void closeClient();
 private:
+	bool isClientRunning;
 	WSADATA data;
 	WORD version;
 	sockaddr_in serverHint , server;
 	SOCKET out;
-	int ser_length;
+	int ser_length, bytesIn;
 	char buf[BUFFSIZE], remoteIP[INET6_ADDRSTRLEN];
 };

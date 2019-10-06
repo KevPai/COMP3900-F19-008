@@ -14,10 +14,10 @@ void writefunc() {
 
 int main() {
 	myserver.CreateServer();
-	myserver.UpdateRecv();
-	//readthread = thread(readfunc);
-	//writethread = thread(writefunc);
+	//myserver.UpdateRecv();
+	readthread = thread(readfunc);
+	writethread = thread(writefunc);
 
-	//readthread.join();
-	//writethread.join();
+	readthread.join();
+	writethread.join();
 }

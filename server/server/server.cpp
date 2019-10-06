@@ -1,6 +1,6 @@
 #include "server.hpp"
 #include <exception>
-
+using namespace std;
 
 
 int get_Input_Message(char *message) {
@@ -27,7 +27,6 @@ Server::~Server() {
 }
 
 void Server::CreateServer() {
-	puts("server created");
 	//creates a socket and sets it to UDP
 	in = socket(AF_INET, SOCK_DGRAM, 0);
 	serverHint.sin_addr.S_un.S_addr = htonl(INADDR_ANY); //give me any addres, whatever the ip of the card
@@ -44,71 +43,50 @@ void Server::CreateServer() {
 }
 
 void Server::UpdateRecv() {
-	puts("what");
-		while (isServRunning) {
-			ZeroMemory(buf, 1024);
-			puts("running");
-			if ((bytesIn = recvfrom(in, buf, BUFFSIZE, 0, (sockaddr*)& client, &clientLength)) == ERROR) {
-				cout << "error receiving from client" << endl;
-			};
 	
-			 
-			//for (int i = 0; i < clients.size(); i++) {
-				//if (clients[i].sin_addr.s_addr == client.sin_addr.s_addr) {
-					clients.push_back(client);
+	//setsockopt(in, SOL_SOCKET, SO_RCVTIMEO, buf, BUFFSIZE);
 
-				//}
-			//}
-			puts(buf);
-			//sendto(in, buf, 1024, 0, (sockaddr*)& client, clientLength);
-			//puts(buf);
-			//HandleMessage();
-			//BroadcastMessage(buf, client);
-			BroadCastMessageToAll(buf);
-		}
-	
-	
-	puts("end of the receive");
-}
-/*
-void Server::UpdateRecv() {
+	while (isServRunning) 
+	{
+		ZeroMemory(buf, 1024);
 
-	while (isServRunning) {
-		//puts("running");
-		if (bytesIn = recvfrom(in, buf, BUFFSIZE, 0, (sockaddr*)& client, &clientLength) == -1) {
-			//puts("running");
-			return;
+		if ((bytesIn = recvfrom(in, buf, BUFFSIZE, 0, (sockaddr*)& client, &clientLength)) == ERROR)
+		{
+			cout << "error receiving from client" << endl;
+		};
+
+		//checks if client is in the client list
+		int match = 0;
+		for (int i = 0; i < clients.size(); i++) 
+		{
+			if (clients[i].sin_addr.s_addr == client.sin_addr.s_addr) 
+			{
+				match = 1;
+				break;
+			}
 		}
-		if (bytesIn > 0) {
-			puts("running");
-			sendto(in, buf, 1024, 0, (sockaddr*)& client, clientLength);
-			//puts(buf);
-			//HandleMessage();
-			//BroadcastMessage(buf, (sockaddr*)&client);
+		if (match == 0) {
+			clients.push_back(client);
 		}
+		std::puts(buf);
+		BroadCastMessageToAll(buf);
+		
 	}
+	
+	
 }
-*/
+
 
 void Server::UpdateSend() {
 	char mes[BUFFSIZE];
-	while (isServRunning) {
-		int messageLen = get_Input_Message(mes);
-		if (messageLen == -1)
-		{
-			return;
-		}
-		else if (strcmp(mes, "/end") == 0)
-		{
-			BroadCastMessageToAll("Server shutdown");
-			//shut the server
-			isServRunning = false;
-		}
-		else
-		{
-			BroadcastMessage(mes, client);
-		}
-	}
+	while (isServRunning)
+	{
+		
+		cin >> mes;
+		cout << endl;
+		BroadCastMessageToAll(mes);
+		
+	};
 }
 
 void Server::HandleMessage() {
@@ -120,7 +98,6 @@ void Server::HandleMessage() {
 
 void Server::BroadcastMessage(string message, sockaddr_in dest) {
 	clientLength = sizeof(dest);
-	cout << message;
 	sendto(in, message.c_str(), 1024, 0, (sockaddr*)& dest, clientLength);
 }
 

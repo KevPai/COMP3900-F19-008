@@ -7,9 +7,9 @@
 #include <iostream>
 #include <algorithm>
 #pragma  comment (lib, "ws2_32.lib")
-using namespace std;
 #define port 5000
 #define BUFFSIZE 1024
+using namespace std;
 class Server {
 public:
 	Server();
@@ -25,12 +25,16 @@ public:
 	bool CompareClients(sockaddr_in c1, sockaddr_in c2);
 	void CloseServer();
 private:
+	// select stuff
+	fd_set master, temp;
+	int fdmax; //tracks the largest socket
+	//
 	int servLength, bytesIn, clientLength;
 	WSADATA data;
 	WORD version;
 	char buf[BUFFSIZE], remoteIP[INET6_ADDRSTRLEN];
 	sockaddr_in serverHint, client;
-	SOCKET in;
+	SOCKET in, maxfdp;
 	vector<sockaddr_in> clients;
 	bool isClient(sockaddr_in c1, sockaddr_in c2);
 
