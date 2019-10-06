@@ -1,6 +1,10 @@
 #include "Header.h"
 #include "Shader.h"
 #include "stb_image.h"
+#include "Camera.h"
+#include "Cube.h"
+
+Camera camera(glm::vec3(0.0f, 0.0f, 0.0f));
 
 int main()
 {
@@ -81,17 +85,18 @@ int main()
 	-0.5f,  0.5f, -0.5f,  0.0f, 1.0f
 	};
 
-	glm::vec3 cubePositions[] = {
-		glm::vec3(0.0f,  0.0f,  0.0f),
-		glm::vec3(2.0f,  5.0f, -15.0f),
-		glm::vec3(-1.5f, -2.2f, -2.5f),
-		glm::vec3(-3.8f, -2.0f, -12.3f),
-		glm::vec3(2.4f, -0.4f, -3.5f),
-		glm::vec3(-1.7f,  3.0f, -7.5f),
-		glm::vec3(1.3f, -2.0f, -2.5f),
-		glm::vec3(1.5f,  2.0f, -2.5f),
-		glm::vec3(1.5f,  0.2f, -1.5f),
-		glm::vec3(-1.3f,  1.0f, -1.5f)
+	glm::vec3 cubePositions[] = 
+	{
+	 glm::vec3(-1.0f, 0.0f, 1.0f),
+	 glm::vec3(-3.0f, 0.0f, 2.0f),
+	 glm::vec3(-2.0f, 0.0f, 4.0f),
+	 glm::vec3(0.0f, 0.0f, 6.0f),
+	 glm::vec3(-3.0f, 0.0f, 7.0f),
+	 glm::vec3(-1.0f, 0.0f, 8.0f),
+	 glm::vec3(2.0f, 0.0f, 0.0f),
+	 glm::vec3(2.0f, 0.0f, 5.0f),
+	 glm::vec3(3.0f, 0.0f, 3.0f),
+	 glm::vec3(2.0f, 0.0f, 8.0f)
 	};
 
 	//Holds position of object
@@ -99,6 +104,9 @@ int main()
 
 	//Holds rotation of object
 	glm::vec3 rotation(0.0f);
+
+	//Holds camera position
+	glm::vec3 camPosition = glm::vec3(0.0f, 0.0f, -3.0f);
 
 	//Vertex buffer object AND vertex array object
 	unsigned int VBO, VAO;
@@ -154,7 +162,7 @@ int main()
 	while (!glfwWindowShouldClose(window))
 	{
 		// Checks inputs
-		processInput(window, position, rotation);
+		processInput(window, position, rotation, camPosition);
 
 		// Rendering...
 		glClearColor(0.0f, 0.0f, 0.0f, 0.0f); //Window color
@@ -172,11 +180,14 @@ int main()
 		projection = glm::perspective(glm::radians(45.0f), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
 		
 		//Initialize the model
-		glm::mat4 model = glm::mat4(1.0f);
+		//glm::mat4 model = glm::mat4(1.0f);
+		Cube cube1;
 
 		//Moves the view
-		glm::mat4 view = glm::mat4(1.0f);
-		view = glm::translate(view, glm::vec3(0.0f, 0.0f, -5.0f));
+		glm::mat4 view;
+		view = camera.GetViewMatrix();
+		view = glm::translate(view, camPosition);
+		//view = glm::rotate(view, 0.3f, glm::vec3(1.0f, 0.0f, 0.0f));
 
 		glm::mat4 transform = glm::mat4(1.0f);
 		//Handles position of object relative to window
@@ -188,7 +199,7 @@ int main()
 		unsigned int modelLoc = glGetUniformLocation(myShader.Program, "model");
 		unsigned int viewLoc = glGetUniformLocation(myShader.Program, "view");
 		//Pass to shader
-		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(cube1.getModel()));
 		glUniformMatrix4fv(viewLoc, 1, GL_FALSE, &view[0][0]);
 
 		//Sets projection onto shader
@@ -196,15 +207,25 @@ int main()
 
 		glBindVertexArray(VAO);
 
-		model = glm::mat4(1.0f);
+		//model = glm::mat4(1.0f);
 		//Set initial position
-		model = glm::translate(model, position);
+		cube1.move(position);
 		//Rotate models by an angle
-		model = glm::rotate(model, glm::radians(rotation.x), glm::vec3(1.0f, 0.0f, 0.0f));
-		model = glm::rotate(model, glm::radians(rotation.y), glm::vec3(0.0f, 1.0f, 0.0f));
+		cube1.rotate(rotation, glm::vec3(0.0f, 1.0f, 0.0f));
 		//Set shaders and draw
-		myShader.setMat4("model", model);
+		myShader.setMat4("model", cube1.getModel());
 		glDrawArrays(GL_TRIANGLES, 0, 36);
+
+		Cube cubes[10];
+		for (unsigned int i = 0; i < 10; i++)
+		{
+			cubes[i].move(cubePositions[i]);
+			//float angle = 20.0f * i;
+			//model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
+			myShader.setMat4("model", cubes[i].getModel());
+
+			glDrawArrays(GL_TRIANGLES, 0, 36);
+		}
 
 		// GLFW: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
 		glfwSwapBuffers(window);
