@@ -13,10 +13,8 @@
 
 void processInput(GLFWwindow* window, glm::vec3& position, glm::vec3& rotation, glm::vec3& camPosition);
 
-//void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mode);
 //void ScrollCallback(GLFWwindow* window, double xOffset, double yOffset);
-//void MouseCallback(GLFWwindow* window, double xPos, double yPos);
-//void DoMovement();
+void mouse_callback(GLFWwindow* window, double xPos, double yPos);
 
 const unsigned int SCR_WIDTH = 1200;
 const unsigned int SCR_HEIGHT = 800;

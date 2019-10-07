@@ -9,23 +9,23 @@ void processInput(GLFWwindow* window, glm::vec3& position, glm::vec3& rotation, 
 	}
 
 	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
-		position.z -= 0.03f;
-		camPosition.z += 0.03f;
-	}
-
-	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
 		position.z += 0.03f;
 		camPosition.z -= 0.03f;
 	}
 
+	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
+		position.z -= 0.03f;
+		camPosition.z += 0.03f;
+	}
+
 	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
-		position.x -= 0.03f;
-		camPosition.x += 0.03f;
+		position.x += 0.03f;
+		camPosition.x -= 0.03f;
 	}
 
 	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
-		position.x += 0.03f;
-		camPosition.x -= 0.03f;
+		position.x -= 0.03f;
+		camPosition.x += 0.03f;
 	}
 	
 	if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS) {
