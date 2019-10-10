@@ -12,7 +12,7 @@ bool firstMouse = true;
 glm::vec3 position(0.0f);
 
 //Holds rotation of object
-glm::vec3 rotation(0.0f);
+glm::vec3 rotation(0.0f, 90.0f, 0.0f);
 
 //Holds camera position
 glm::vec3 camPosition = glm::vec3(0.0f);
@@ -193,8 +193,6 @@ int main()
 		glm::mat4 view = camera.GetViewMatrix();
 		view = glm::translate(view, camPosition);
 		view = glm::translate(view, glm::vec3(0.0f, -0.8f, 0.0f));
-
-		//view = glm::rotate(view, 5.0f, glm::vec3(0.0f, 1.0f, 0.0f));
 
 		//Gets the locations of out matrixes
 		unsigned int modelLoc = glGetUniformLocation(myShader.Program, "model");
