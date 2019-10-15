@@ -132,6 +132,7 @@
     <ClCompile Include="Input.cpp" />
     <ClCompile Include="stb_image.cpp" />
     <ClCompile Include="Window.cpp" />
+    <ClCompile Include="World.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Camera.h" />
