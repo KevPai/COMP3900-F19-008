@@ -1,0 +1,6 @@
+typedef enum {
+	COMPONENT_NONE = 0,
+	COMPONENT_DISP = 1 << 0,
+	COMPONENT_VLCT = 1 << 1,
+	COMPONENT_MESH = 1 << 2
+};
