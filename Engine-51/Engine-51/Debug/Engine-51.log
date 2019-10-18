@@ -1,3 +1,2 @@
-﻿  Collision.cpp
-F:\BCIT\Term 3\Project 3\Engine-51\Engine-51\Collision.cpp(34): warning C4715:  'checkCollision': not all control paths return a value
+﻿  Window.cpp
   Engine-51.vcxproj -> F:\BCIT\Term 3\Project 3\Engine-51\Debug\Engine-51.exe

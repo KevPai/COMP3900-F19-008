@@ -44,12 +44,12 @@ int processInput(GLFWwindow* window, glm::vec3& position, glm::vec3& rotation, g
 	}
 
 	if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS) {
-		rotation.y += 1.0f;
+		rotation.y -= 1.0f;
 		return 7;
 	}
 
 	if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS) {
-		rotation.y -= 1.0f;
+		rotation.y += 1.0f;
 		return 9;
 	}
 	return -1;

@@ -161,7 +161,7 @@ int main()
 		Cube test;
 
 		// Checks inputs direction
-		int direction = processInput(window, position, rotation, camPosition);								
+		int direction = processInput(window, position, rotation, camPosition);
 
 		// Rendering...
 		glClearColor(0.0f, 0.0f, 0.0f, 0.0f); //Window color
@@ -212,11 +212,11 @@ int main()
 			camPosition.y = -cube1.getY();
 			break;
 		case -1:			
-			position.x = test.getX() - 1.0f;
+			position.x = test.getX() - 1.05f;
 			camPosition.x = -cube1.getX();
 			break;
 		case 1:
-			position.x = test.getX() + 1.0f;
+			position.x = test.getX() + 1.05f;
 			camPosition.x = cube1.getX();
 			break;
 		case 0:
