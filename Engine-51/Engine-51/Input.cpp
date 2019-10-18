@@ -9,6 +9,7 @@ int processInput(GLFWwindow* window, glm::vec3& position, glm::vec3& rotation, g
 	}
 
 	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
+<<<<<<< HEAD
 		position.z -= 0.03f;
 		camPosition.z += 0.03f;
 		return 8;
@@ -53,4 +54,33 @@ int processInput(GLFWwindow* window, glm::vec3& position, glm::vec3& rotation, g
 		return 9;
 	}
 	return -1;
+=======
+		//position.z += 0.03f;
+		position.z += 0.03f * sinf(rotation.y * 3.14159 / 180);
+		position.x -= 0.03f * cosf(rotation.y * 3.14159 / 180);
+
+		//camPosition.z -= 0.03f;
+		camPosition.z -= 0.03f * sinf(rotation.y * 3.14159 / 180);
+		camPosition.x += 0.03f * cosf(rotation.y * 3.14159 / 180);
+	}
+
+	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
+		//position.z -= 0.03f;
+		position.z -= 0.03f * sinf(rotation.y * 3.14159 / 180);
+		position.x += 0.03f * cosf(rotation.y * 3.14159 / 180);
+
+		//camPosition.z += 0.03f;
+		camPosition.z += 0.03f * sinf(rotation.y * 3.14159 / 180);
+		camPosition.x -= 0.03f * cosf(rotation.y * 3.14159 / 180);
+	}
+
+	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
+		rotation.y += 1.0f;
+	}
+
+	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
+		rotation.y -= 1.0f;
+	}
+	
+>>>>>>> Kevin-branch
 }

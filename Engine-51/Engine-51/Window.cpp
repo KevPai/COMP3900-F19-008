@@ -3,7 +3,20 @@
 #include "Camera.h"
 #include "Collision.h"
 
-Camera camera(glm::vec3(0.0f, 0.0f, 0.0f));
+double lastX = SCR_WIDTH / 2.0f;
+double lastY = SCR_HEIGHT / 2.0f;
+bool firstMouse = true;
+
+//Holds position of object
+glm::vec3 position(0.0f);
+
+//Holds rotation of object
+glm::vec3 rotation(0.0f, 90.0f, 0.0f);
+
+//Holds camera position
+glm::vec3 camPosition = glm::vec3(0.0f);
+
+Camera camera(position);
 
 int main()
 {
@@ -22,6 +35,9 @@ int main()
 		return -1;
 	}
 	glfwMakeContextCurrent(window);
+
+	//Set mouse movement
+	glfwSetCursorPosCallback(window, mouse_callback);
 
 	//Initialize GLAD, GLAD manages function pointers
 	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
@@ -98,6 +114,7 @@ int main()
 	 glm::vec3(2.0f, 0.0f, 8.0f)
 	};
 
+<<<<<<< HEAD
 	// For movement & rotation
 	glm::vec3 position(0.0f);
 	glm::vec3 rotation(0.0f);
@@ -105,6 +122,8 @@ int main()
 	//Holds camera position
 	glm::vec3 camPosition = glm::vec3(0.0f, 0.0f, -5.0f);
 
+=======
+>>>>>>> Kevin-branch
 	//Vertex buffer object AND vertex array object
 	unsigned int VBO, VAO;
 	glGenVertexArrays(1, &VAO);
@@ -172,12 +191,24 @@ int main()
 		myShader.Use();
 
 		//Handles field of view, aspect ratio, 'near-clipping plane', and 'far-clipping plane'
+<<<<<<< HEAD
 		glm::mat4 projection = glm::mat4(1.0f);
 		glm::mat4 view;
 
 		projection = glm::perspective(glm::radians(45.0f), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);		
 		view = camera.GetViewMatrix();
 		view = glm::translate(view, camPosition);
+=======
+		projection = glm::perspective(glm::radians(45.0f), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
+		
+		//Initialize the model
+		Cube cube1;
+
+		//Moves the view
+		glm::mat4 view = camera.GetViewMatrix();
+		view = glm::translate(view, camPosition);
+		view = glm::translate(view, glm::vec3(0.0f, -0.8f, 0.0f));
+>>>>>>> Kevin-branch
 
 		//Gets the locations of out matrixes
 		unsigned int modelLoc = glGetUniformLocation(myShader.Program, "model");
@@ -253,3 +284,24 @@ int main()
 	glfwTerminate();
 	return 0;
 }
+<<<<<<< HEAD
+=======
+
+void mouse_callback(GLFWwindow* window, double xpos, double ypos)
+{
+	if (firstMouse)
+	{
+		lastX = xpos;
+		lastY = ypos;
+		firstMouse = false;
+	}
+
+	float xoffset = (float) (xpos - lastX);
+	float yoffset = (float) (lastY - ypos); // reversed since y-coordinates go from bottom to top
+
+	lastX = xpos;
+	lastY = ypos;
+
+	camera.ProcessMouseMovement(xoffset, yoffset);
+}
+>>>>>>> Kevin-branch
