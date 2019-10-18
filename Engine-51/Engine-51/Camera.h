@@ -11,7 +11,7 @@ class Camera {
 public:
 	//Constructor for vectors
 	Camera(glm::vec3 position) {
-	
+
 		this->objectPosition = position;
 		this->camPosition = glm::vec3(position.x, position.y, position.z);
 		this->up = glm::vec3(0.0f, 1.0f, 0.0f);
@@ -19,11 +19,11 @@ public:
 		this->theta = 0;
 		this->phi = 0;
 
-	this->updateCameraVectors();
+		this->updateCameraVectors();
 	}
 
 	//Look at an object
-	glm::mat4 GetViewMatrix() 
+	glm::mat4 GetViewMatrix()
 	{
 		glm::mat4 view = glm::lookAt(this->camPosition, this->objectPosition, this->up);
 
@@ -37,23 +37,23 @@ public:
 		yOffset *= this->mouseSensitivity;
 
 		this->theta += xOffset;
-		//this->phi += yOffset;
+		this->phi += yOffset;
 
 		//Prevents user from moving camera out of bounds
 		if (constrainPitch)
 		{
-			/*if (this->theta > 180.0f)
+			/*if (this->theta > 89.0f)
 			{
-				this->theta = 180.0f;
+				this->theta = 89.0f;
 			}
 			if (this->theta < 0.0f)
 			{
 				this->theta = 0.0f;
 			}*/
 
-			if (this->phi > 360.0f)
+			if (this->phi > 89.0f)
 			{
-				this->phi = 360.0f;
+				this->phi = -89.0f;
 			}
 			if (this->phi < 0.0f)
 			{
@@ -76,8 +76,9 @@ private:
 
 	void updateCameraVectors()
 	{
-		this->camPosition.x = -6.0f * cos(this->phi) * sin(this->theta);
-		this->camPosition.y = -6.0f * sin(this->phi) * sin(this->theta);
-		this->camPosition.z = -6.0f * cos(this->theta);
+		this->camPosition.y = -6.0f * sin(this->phi);
+		float zx = -6.0f * cos(this->phi);
+		this->camPosition.x = zx * sin(this->theta);
+		this->camPosition.z = zx * cos(this->theta);
 	}
 };
