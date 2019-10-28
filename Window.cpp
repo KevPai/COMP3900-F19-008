@@ -2,6 +2,7 @@
 #include "stb_image.h"
 #include "Camera.h"
 #include "Cube.h"
+#include "Model.h"
 
 double lastX = SCR_WIDTH / 2.0f;
 double lastY = SCR_HEIGHT / 2.0f;
@@ -151,7 +152,8 @@ int main()
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	
-	unsigned char* data = stbi_load("doge.jpg", &width, &height, &nrChannels, 0);
+	//unsigned char* data = stbi_load("doge.jpg", &width, &height, &nrChannels, 0);
+	unsigned char* data = stbi_load("crate.jpg", &width, &height, &nrChannels, 0);
 	if (data)
 	{
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
@@ -163,6 +165,9 @@ int main()
 	}
 	//Free image data
 	stbi_image_free(data);
+
+	GLchar modelPath[] = "Models/Tank.obj";
+	Model ourModel(modelPath);
 
 	// Render loop
 	while (!glfwWindowShouldClose(window))
@@ -205,25 +210,24 @@ int main()
 
 		glBindVertexArray(VAO);
 
-		//model = glm::mat4(1.0f);
-		//Set initial position
-		cube1.move(position);
-		//Rotate models by an angle
-		cube1.rotate(rotation, glm::vec3(0.0f, 1.0f, 0.0f));
-		//Set shaders and draw
-		myShader.setMat4("model", cube1.getModel());
-		glDrawArrays(GL_TRIANGLES, 0, 36);
-
 		Cube cubes[10];
 		for (unsigned int i = 0; i < 10; i++)
 		{
 			cubes[i].move(cubePositions[i]);
-			//float angle = 20.0f * i;
-			//model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
 			myShader.setMat4("model", cubes[i].getModel());
 
 			glDrawArrays(GL_TRIANGLES, 0, 36);
 		}
+
+		// render the loaded model
+		glm::mat4 model = glm::mat4(1.0f);
+		model = glm::translate(model, glm::vec3(0.0f, -0.5f, 0.0f)); // translate it down so it's at the center of the scene
+		model = glm::translate(model, glm::vec3(position));
+		model = glm::rotate(model, glm::radians(270.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+		model = glm::rotate(model, glm::radians(rotation.y), glm::vec3(0.0f, 1.0f, 0.0f));
+		model = glm::scale(model, glm::vec3(0.01f, 0.01f, 0.01f));	// it's a bit too big for our scene, so scale it down
+		myShader.setMat4("model", model);
+		ourModel.Draw(myShader);
 
 		// GLFW: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
 		glfwSwapBuffers(window);

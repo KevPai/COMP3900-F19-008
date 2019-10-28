@@ -1,6 +1,5 @@
 #pragma once
 #include "Shader.h"
-#include "Header.h"
 
 using namespace std;
 
