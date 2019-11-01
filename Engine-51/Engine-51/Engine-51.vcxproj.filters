@@ -16,61 +16,73 @@
     <Filter Include="Source Files\World">
       <UniqueIdentifier>{d40d338a-8f7a-41d5-aefe-1319de0236a2}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\HUD">
-      <UniqueIdentifier>{04ea5b76-964e-47f7-b798-b038fde8d2e1}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\HUD">
       <UniqueIdentifier>{70bdee99-76cf-4d4b-90ac-04572b52cad3}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Graphics">
+      <UniqueIdentifier>{d4bbaa13-1eb4-4a66-a8b1-1ddffb6503cd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Graphics\HUD">
+      <UniqueIdentifier>{04ea5b76-964e-47f7-b798-b038fde8d2e1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Graphics\Scene">
+      <UniqueIdentifier>{4e32701a-03f5-4b92-8032-0f17529f79a5}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="glad.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Window.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Input.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="stb_image.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="World.cpp">
       <Filter>Source Files\World</Filter>
     </ClCompile>
     <ClCompile Include="hudSystem.cpp">
       <Filter>Source Files\HUD</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\08Engine51\E51\Input.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\08Engine51\E51\stb_image.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\08Engine51\E51\Window.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\08Engine51\E51\glad.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Header.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Shader.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Camera.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Cube.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
     <ClInclude Include="hudSystem.h">
-      <Filter>Header Files\HUD</Filter>
+      <Filter>Header Files\Graphics\HUD</Filter>
     </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="core.vs">
+    <ClInclude Include="..\..\..\08Engine51\E51\Mesh.h">
       <Filter>Source Files</Filter>
-    </None>
-    <None Include="core.frag">
+    </ClInclude>
+    <ClInclude Include="..\..\..\08Engine51\E51\Model.h">
       <Filter>Source Files</Filter>
-    </None>
+    </ClInclude>
+    <ClInclude Include="..\..\..\08Engine51\E51\Shader.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\08Engine51\E51\Cube.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\08Engine51\E51\Camera.h">
+      <Filter>Header Files\Graphics\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\08Engine51\E51\Header.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="..\Debug\doge.jpg">
       <Filter>Resource Files</Filter>
     </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\..\08Engine51\E51\core.frag">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="..\..\..\08Engine51\E51\core.vs">
+      <Filter>Source Files</Filter>
+    </None>
   </ItemGroup>
 </Project>

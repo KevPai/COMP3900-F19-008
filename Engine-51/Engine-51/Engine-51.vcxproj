@@ -70,8 +70,8 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>$(SolutionDir)\..\OpenGL\Include;$(IncludePath)</IncludePath>
-    <LibraryPath>$(SolutionDir)\..\OpenGL\Libraries;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(SolutionDir)\..\OpenGL\Include;$(SolutionDir)\..\ASSIMP\Include;C:\Users\Joselito J.M. Ayeras\Documents\COMP3900-F19-008\ASSIMP\Include;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\Users\Joselito J.M. Ayeras\Documents\COMP3900-F19-008\ASSIMP\Library;$(SolutionDir)\..\OpenGL\Libraries;$(SolutionDir)\..\ASSIMP\Library;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -82,7 +82,7 @@
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
-      <AdditionalDependencies>glfw3.lib;opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>glfw3.lib;opengl32.lib;assimp-vc142-mtd.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
     </Link>
   </ItemDefinitionGroup>
@@ -128,26 +128,28 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="glad.c" />
+    <ClCompile Include="..\..\..\08Engine51\E51\glad.c" />
+    <ClCompile Include="..\..\..\08Engine51\E51\Input.cpp" />
+    <ClCompile Include="..\..\..\08Engine51\E51\stb_image.cpp" />
+    <ClCompile Include="..\..\..\08Engine51\E51\Window.cpp" />
     <ClCompile Include="hudSystem.cpp" />
-    <ClCompile Include="Input.cpp" />
-    <ClCompile Include="stb_image.cpp" />
-    <ClCompile Include="Window.cpp" />
     <ClCompile Include="World.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Camera.h" />
-    <ClInclude Include="Cube.h" />
-    <ClInclude Include="Header.h" />
+    <ClInclude Include="..\..\..\08Engine51\E51\Camera.h" />
+    <ClInclude Include="..\..\..\08Engine51\E51\Cube.h" />
+    <ClInclude Include="..\..\..\08Engine51\E51\Header.h" />
+    <ClInclude Include="..\..\..\08Engine51\E51\Mesh.h" />
+    <ClInclude Include="..\..\..\08Engine51\E51\Model.h" />
+    <ClInclude Include="..\..\..\08Engine51\E51\Shader.h" />
     <ClInclude Include="hudSystem.h" />
-    <ClInclude Include="Shader.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="core.frag" />
-    <None Include="core.vs" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="..\Debug\doge.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\..\08Engine51\E51\core.frag" />
+    <None Include="..\..\..\08Engine51\E51\core.vs" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

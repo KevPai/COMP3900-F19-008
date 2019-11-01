@@ -1,8 +1,8 @@
 ﻿  glad.c
-  hudSystem.cpp
   Input.cpp
   stb_image.cpp
   Window.cpp
+  hudSystem.cpp
   World.cpp
   Generating Code...
 C:\Users\Joselito J.M. Ayeras\Documents\COMP3900-F19-008\Engine-51\Engine-51\World.cpp(6,2): warning C4091:  'typedef ': ignored on left of '<unnamed-enum-COMPONENT_NONE>' when no variable is declared
