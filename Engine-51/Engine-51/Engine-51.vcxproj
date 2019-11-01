@@ -70,8 +70,8 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>$(SolutionDir)\..\OpenGL\Include;C:\Users\KPai5\Desktop\BCIT Archive\OpenGL\Include;$(IncludePath)</IncludePath>
-    <LibraryPath>$(SolutionDir)\..\OpenGL\Libraries;C:\Users\KPai5\Desktop\BCIT Archive\OpenGL\Libraries;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(SolutionDir)\..\OpenGL\Include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)\..\OpenGL\Libraries;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>

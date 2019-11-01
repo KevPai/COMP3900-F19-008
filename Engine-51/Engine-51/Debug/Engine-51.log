@@ -1,1 +1,10 @@
-﻿  Engine-51.vcxproj -> E:\COMP3900-F19-008\Engine-51\Debug\Engine-51.exe
+﻿  glad.c
+  hudSystem.cpp
+  Input.cpp
+  stb_image.cpp
+  Window.cpp
+  World.cpp
+  Generating Code...
+C:\Users\Joselito J.M. Ayeras\Documents\COMP3900-F19-008\Engine-51\Engine-51\World.cpp(6,2): warning C4091:  'typedef ': ignored on left of '<unnamed-enum-COMPONENT_NONE>' when no variable is declared
+LINK : warning LNK4098: defaultlib 'MSVCRT' conflicts with use of other libs; use /NODEFAULTLIB:library
+  Engine-51.vcxproj -> C:\Users\Joselito J.M. Ayeras\Documents\COMP3900-F19-008\Engine-51\Debug\Engine-51.exe
