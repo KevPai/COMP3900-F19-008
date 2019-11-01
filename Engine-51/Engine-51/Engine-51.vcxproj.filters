@@ -16,6 +16,12 @@
     <Filter Include="Source Files\World">
       <UniqueIdentifier>{d40d338a-8f7a-41d5-aefe-1319de0236a2}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\HUD">
+      <UniqueIdentifier>{04ea5b76-964e-47f7-b798-b038fde8d2e1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\HUD">
+      <UniqueIdentifier>{70bdee99-76cf-4d4b-90ac-04572b52cad3}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="glad.c">
@@ -33,6 +39,9 @@
     <ClCompile Include="World.cpp">
       <Filter>Source Files\World</Filter>
     </ClCompile>
+    <ClCompile Include="hudSystem.cpp">
+      <Filter>Source Files\HUD</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Header.h">
@@ -46,6 +55,9 @@
     </ClInclude>
     <ClInclude Include="Cube.h">
       <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="hudSystem.h">
+      <Filter>Header Files\HUD</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
