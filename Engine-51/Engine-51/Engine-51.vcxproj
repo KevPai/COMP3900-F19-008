@@ -70,6 +70,10 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <IncludePath>F:\BCIT\Term 3\Project 3\Engine-51\Engine-51\ASSIMP\Include;F:\BCIT\Term 3\Project 3\Engine-51\OpenGL\Include;$(IncludePath)</IncludePath>
+    <LibraryPath>F:\BCIT\Term 3\Project 3\Engine-51\Engine-51\ASSIMP\Library;F:\BCIT\Term 3\Project 3\Engine-51\OpenGL\Libraries;$(LibraryPath)</LibraryPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <IncludePath>F:\BCIT\Term 3\Project 3\OpenGL\Include;$(IncludePath)</IncludePath>
     <LibraryPath>F:\BCIT\Term 3\Project 3\OpenGL\Libraries;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
@@ -82,7 +86,7 @@
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
-      <AdditionalDependencies>glfw3.lib;opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>glfw3.lib;opengl32.lib;assimp-vc142-mtd.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
     </Link>
   </ItemDefinitionGroup>
@@ -95,6 +99,7 @@
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
+      <AdditionalDependencies>glfw3.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -129,8 +134,10 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Collision.cpp" />
+    <ClCompile Include="Cube.cpp" />
     <ClCompile Include="glad.c" />
     <ClCompile Include="Input.cpp" />
+    <ClCompile Include="Model.cpp" />
     <ClCompile Include="stb_image.cpp" />
     <ClCompile Include="Window.cpp" />
   </ItemGroup>
@@ -139,6 +146,7 @@
     <ClInclude Include="Collision.h" />
     <ClInclude Include="Cube.h" />
     <ClInclude Include="Header.h" />
+    <ClInclude Include="Model.h" />
     <ClInclude Include="Shader.h" />
   </ItemGroup>
   <ItemGroup>

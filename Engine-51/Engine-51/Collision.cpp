@@ -1,35 +1,23 @@
 #include "Collision.h"
 
-int checkCollision(Cube player, Cube toTest, int direction) {
-	if (direction == 5 || direction == 0) {
-		if (boundary(player.getX() - toTest.getX(), 
-					(player.getZ() - toTest.getZ()))) {
-			if (between(player.getY() - toTest.getY(), 0.0f, 1.0f)) {
-				return 2;
-			} else if (between(player.getY() - toTest.getY(), -1.0f, 0.0f)) {
-				return -2;
-			}
+int checkCollision(Model player, glm::vec3& position, Cube toTest, float scale) {
+	if (boundary(position.x - toTest.getX(),
+		(position.y - toTest.getY()))) {
+		if (between((position.z + player.getDimZ()[0] * scale) - toTest.getZ(), 0.0f, 0.03f)) {
+			return 3;
 		}
-	} else if (direction == 4 || direction == 6) {		
-		if (boundary(player.getY() - toTest.getY(),
-					(player.getZ() - toTest.getZ()))) {
-			if (between(player.getX() - toTest.getX(), -1.0f, 0.0f)) {
-				return -1;
-			} else if (between(player.getX() - toTest.getX(), 0.0f, 1.0f)) {
-				return 1;
-			}
+		else if (between((position.z + player.getDimZ()[1] * scale) - toTest.getZ(), -0.5f, 0.0f)) {
+			return -3;
 		}
-	} else if (direction == 8 || direction == 2) {
-		if (boundary(player.getX() - toTest.getX(), 
-					(player.getY() - toTest.getY()))) {
-			if (between(player.getZ() - toTest.getZ(), 0.0f, 0.1f)) {
-				return 3;
-			} else if (between(player.getZ() - toTest.getZ(), -1.0f, 0.0f)) {
-				return -3;
-			}
-		}						
-	} else {
-		return 0;
+	}
+	else if (boundary(position.y - toTest.getY(),
+		(position.z - toTest.getZ()))) {
+		if (between((position.x + player.getDimX()[0] * scale) - toTest.getX(), -0.5f, 0.0f)) {
+			return 1;
+		}
+		else if (between((position.x + player.getDimX()[1] * scale) - toTest.getX(), 0.0f, 0.5f)) {
+			return -1;
+		}
 	}
 }
 
