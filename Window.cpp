@@ -4,23 +4,23 @@
 #include "Cube.h"
 #include "Model.h"
 
-double lastX = SCR_WIDTH / 2.0f;
-double lastY = SCR_HEIGHT / 2.0f;
-bool firstMouse = true;
-
-//Holds position of object
-glm::vec3 position(0.0f);
-
-//Holds rotation of object
-glm::vec3 rotation(0.0f, 90.0f, 0.0f);
-
-//Holds camera position
-glm::vec3 camPosition = glm::vec3(0.0f);
-
-Camera camera(position);
-
 int main()
 {
+	double lastX = SCR_WIDTH / 2.0f;
+	double lastY = SCR_HEIGHT / 2.0f;
+	bool firstMouse = true;
+
+	//Holds position of object
+	glm::vec3 position(0.0f);
+
+	//Holds rotation of object
+	glm::vec3 rotation(0.0f, 90.0f, 0.0f);
+
+	//Holds camera position
+	glm::vec3 camPosition = glm::vec3(0.0f);
+
+	Camera camera(position);
+
 	//Initialize GLFW
 	glfwInit();
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
@@ -40,6 +40,8 @@ int main()
 	//Set mouse movement
 	glfwSetCursorPosCallback(window, mouse_callback);
 
+	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+
 	//Initialize GLAD, GLAD manages function pointers
 	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
 	{
@@ -53,9 +55,7 @@ int main()
 	//Need this so cube sides do not draw over each other
 	glEnable(GL_DEPTH_TEST);
 
-	Shader myShader("core.vs", "core.frag");
-	
-		//3D Shape coordinates
+	//3D Shape coordinates
 	float vertices[180] =
 	{
 	-0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
@@ -101,7 +101,7 @@ int main()
 	-0.5f,  0.5f, -0.5f,  0.0f, 1.0f
 	};
 
-	glm::vec3 cubePositions[] = 
+	glm::vec3 cubePositions[] =
 	{
 	 glm::vec3(-1.0f, 0.0f, 1.0f),
 	 glm::vec3(-3.0f, 0.0f, 2.0f),
@@ -114,6 +114,8 @@ int main()
 	 glm::vec3(3.0f, 0.0f, 3.0f),
 	 glm::vec3(2.0f, 0.0f, 8.0f)
 	};
+
+	Shader myShader("core.vs", "core.frag");
 
 	//Vertex buffer object AND vertex array object
 	unsigned int VBO, VAO;
@@ -136,22 +138,13 @@ int main()
 	glEnableVertexAttribArray(2);
 
 	//Load and create a texture 
-	unsigned int texture;
+	unsigned int texture[2];
 	//Load image, create texture and generate mipmaps
 	int width, height, nrChannels;
 
-	glGenTextures(1, &texture);
+	glGenTextures(2, texture);
 	//All upcoming GL_TEXTURE_2D operations now have effect on this texture object
-	glBindTexture(GL_TEXTURE_2D, texture);
-
-	//Set the texture wrapping parameters
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-
-	//Set texture filtering parameters
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	
+	glBindTexture(GL_TEXTURE_2D, texture[0]);
 	unsigned char* data = stbi_load("crate.jpg", &width, &height, &nrChannels, 0);
 	if (data)
 	{
@@ -162,13 +155,40 @@ int main()
 	{
 		std::cout << "Failed to load texture" << std::endl;
 	}
+	//Set the texture wrapping parameters
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	//Set texture filtering parameters
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	//Free image data
 	stbi_image_free(data);
 
+	glBindTexture(GL_TEXTURE_2D, texture[1]);
+	data = stbi_load("Models/Tank_dif.jpg", &width, &height, &nrChannels, 0);
+	if (data)
+	{
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+		glGenerateMipmap(GL_TEXTURE_2D);
+	}
+	else
+	{
+		std::cout << "Failed to load texture" << std::endl;
+	}
+	//Set the texture wrapping parameters
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	//Set texture filtering parameters
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	//Free image data
+	stbi_image_free(data);
+
+	//Initialize model
 	GLchar modelPath[] = "Models/Tank.obj";
 	Model ourModel(modelPath);
 
-	// Render loop
+	//Render loop
 	while (!glfwWindowShouldClose(window))
 	{
 		// Checks inputs
@@ -176,7 +196,6 @@ int main()
 
 		// Rendering...
 		glClearColor(0.0f, 0.0f, 0.0f, 0.0f); //Window color
-		glClear(GL_COLOR_BUFFER_BIT);
 
 		//Clears out repeating sides so cube looks correct on rotation
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -209,6 +228,9 @@ int main()
 
 		glBindVertexArray(VAO);
 
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, texture[0]);
+
 		Cube cubes[10];
 		for (unsigned int i = 0; i < 10; i++)
 		{
@@ -217,6 +239,9 @@ int main()
 
 			glDrawArrays(GL_TRIANGLES, 0, 36);
 		}
+
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, texture[1]);
 
 		// render the loaded model
 		glm::mat4 model = glm::mat4(1.0f);
@@ -257,5 +282,5 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
 	lastX = xpos;
 	lastY = ypos;
 
-	camera.ProcessMouseMovement(xoffset, yoffset);
+	camera.ProcessMouseMovement(-xoffset, -yoffset);
 }

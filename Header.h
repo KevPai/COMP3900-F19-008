@@ -20,3 +20,6 @@ void mouse_callback(GLFWwindow* window, double xPos, double yPos);
 const float TO_RADIANS = (float)(3.1415926535897 / 180);
 const unsigned int SCR_WIDTH = 1200;
 const unsigned int SCR_HEIGHT = 800;
+
+//Sesitivity of mouse
+const GLfloat SENSITIVITY = 0.01f;

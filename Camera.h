@@ -1,9 +1,6 @@
 #pragma once
 #include "Header.h"
 
-//Sesitivity of mouse
-const GLfloat SENSITIVITY = 0.01f;
-
 class Camera {
 public:
 	//Constructor for vectors
@@ -39,13 +36,13 @@ public:
 		//Prevents user from moving camera out of bounds
 		if (constrainPitch)
 		{
-			if (this->phi > 89.0f)
-			{
-				this->phi = -89.0f;
-			}
-			if (this->phi < 0.0f)
+			if (this->phi > 0.0f)
 			{
 				this->phi = 0.0f;
+			}
+			if (this->phi < -1.5f)
+			{
+				this->phi = -1.5f;
 			}
 		}
 
@@ -65,7 +62,7 @@ private:
 	void updateCameraVectors()
 	{
 		this->camPosition.y = -6.0f * sin(this->phi);
-		float zx = -6.0f * cos(this->phi);
+		float zx = 6.0f * cos(this->phi);
 		this->camPosition.x = zx * sin(this->theta);
 		this->camPosition.z = zx * cos(this->theta);
 	}
