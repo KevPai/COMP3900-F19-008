@@ -34,18 +34,18 @@ public:
 		yOffset *= this->mouseSensitivity;
 
 		this->theta += xOffset;
-		this->phi += yOffset;
+		this->phi += yOffset;	
 
 		//Prevents user from moving camera out of bounds
 		if (constrainPitch)
 		{
-			if (this->phi > 89.0f)
-			{
-				this->phi = -89.0f;
-			}
-			if (this->phi < 0.0f)
+			if (this->phi > 0.0f)
 			{
 				this->phi = 0.0f;
+			}
+			if (this->phi < -1.5f)
+			{				
+				this->phi = -1.5f;
 			}
 		}
 

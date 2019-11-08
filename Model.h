@@ -6,9 +6,7 @@
 #include <assimp/postprocess.h>
 
 using namespace std;
-
 unsigned int TextureFromFile(const char* path, const string directory);
-
 class Model 
 {
 public:
@@ -18,20 +16,42 @@ public:
 		this->loadModel(path);
 	}
 
-	//Draws the model by checking all its meshes
-	void Draw(Shader shader)
-	{
-		for (unsigned int i = 0; i < this->meshes.size(); i++)
-		{
-			this->meshes[i].Draw(shader);
-		}
-	}
-
+	//Draws the model by checking all its meshes	
+	void Draw(Shader);
+	float* getDimX();
+	float* getDimY();
+	float* getDimZ();
 private:
 	vector<Mesh> meshes;
 	string directory;
 	//Stores all textures loaded, so that textures are only loaded once for optimization
 	vector<Texture> textures_loaded;
+	// Used to get model's Left, Right, Front and Back boundaries
+	float max[3] = { 0.0,0.0,0.0 }, min[3] = { 0.0,0.0,0.0 };
+
+	void updateMaxMin(float x, float y, float z) {
+		for (int i = 0; i < 3; i++) {
+			float target;
+			switch (i) {
+			case 0:
+				target = x;
+				break;
+			case 1:
+				target = y;
+				break;
+			case 2:
+				target = z;
+				break;
+			}
+
+			if (target >= max[i]) {
+				max[i] = target;
+			}
+			else if (target <= min[i]) {
+				min[i] = target;
+			}
+		}
+	}	
 
 	//Loades your model using ASSIMP extensions and stores all meshes to mesh vector
 	void loadModel(string path)
@@ -89,6 +109,9 @@ private:
 			vector.x = mesh->mVertices[i].x;
 			vector.y = mesh->mVertices[i].y;
 			vector.z = mesh->mVertices[i].z;
+
+			updateMaxMin(mesh->mVertices[i].x, mesh->mVertices[i].y, mesh->mVertices[i].z);			
+
 			vertex.Position = vector;
 			// normals
 			vector.x = mesh->mNormals[i].x;
@@ -108,7 +131,8 @@ private:
 			else
 				vertex.TexCoords = glm::vec2(0.0f, 0.0f);
 			vertices.push_back(vertex);
-		}
+		}		
+
 		// now wak through each of the mesh's faces (a face is a mesh its triangle) and retrieve the corresponding vertex indices.
 		for (unsigned int i = 0; i < mesh->mNumFaces; i++)
 		{
@@ -176,43 +200,3 @@ private:
 		return textures;
 	}
 };
-
-unsigned int TextureFromFile(const char* path, const string directory)
-{
-	string filename = string(path);
-	filename = directory + '/' + filename;
-
-	unsigned int textureID;
-	glGenTextures(1, &textureID);
-
-	int width, height, nrComponents;
-	unsigned char* data = stbi_load(filename.c_str(), &width, &height, &nrComponents, 0);
-	if (data)
-	{
-		GLenum format;
-		if (nrComponents == 1)
-			format = GL_RED;
-		else if (nrComponents == 3)
-			format = GL_RGB;
-		else if (nrComponents == 4)
-			format = GL_RGBA;
-
-		glBindTexture(GL_TEXTURE_2D, textureID);
-		glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
-		glGenerateMipmap(GL_TEXTURE_2D);
-
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-		stbi_image_free(data);
-	}
-	else
-	{
-		std::cout << "Texture failed to load at path: " << path << std::endl;
-		stbi_image_free(data);
-	}
-
-	return textureID;
-}

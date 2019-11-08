@@ -9,22 +9,6 @@ void processInput(GLFWwindow* window, glm::vec3& position, glm::vec3& rotation, 
 		glfwSetWindowShouldClose(window, true);
 	}
 
-	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
-		position.z += 0.03f * sinf(rotation.y * TO_RADIANS);
-		position.x -= 0.03f * cosf(rotation.y * TO_RADIANS);
-
-		camPosition.z -= 0.03f * sinf(rotation.y * TO_RADIANS);
-		camPosition.x += 0.03f * cosf(rotation.y * TO_RADIANS);
-	}
-
-	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
-		position.z -= 0.03f * sinf(rotation.y * TO_RADIANS);
-		position.x += 0.03f * cosf(rotation.y * TO_RADIANS);
-
-		camPosition.z += 0.03f * sinf(rotation.y * TO_RADIANS);
-		camPosition.x -= 0.03f * cosf(rotation.y * TO_RADIANS);
-	}
-
 	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
 		rotation.y += 1.0f;
 	}
@@ -32,5 +16,20 @@ void processInput(GLFWwindow* window, glm::vec3& position, glm::vec3& rotation, 
 	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
 		rotation.y -= 1.0f;
 	}
-	
+
+	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
+		position.z += 0.03f * sinf(rotation.y * TO_RADIANS);
+		position.x -= 0.03f * cosf(rotation.y * TO_RADIANS);
+
+		camPosition.z -= 0.03f * sinf(rotation.y * TO_RADIANS);
+		camPosition.x += 0.03f * cosf(rotation.y * TO_RADIANS);		
+	}
+
+	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
+		position.z -= 0.03f * sinf(rotation.y * TO_RADIANS);
+		position.x += 0.03f * cosf(rotation.y * TO_RADIANS);
+
+		camPosition.z += 0.03f * sinf(rotation.y * TO_RADIANS);
+		camPosition.x -= 0.03f * cosf(rotation.y * TO_RADIANS);		
+	}	
 }
