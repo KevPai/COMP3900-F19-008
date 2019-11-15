@@ -5,4 +5,4 @@ struct BSPT {
   BSPT * front;
   BSPT * back;
 }
-void buildBSPTree(BSPT tree, Cube * cubes);
+void buildBSPTree(BSPT tree, std::list<Cube> cubes);
