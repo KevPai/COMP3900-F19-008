@@ -2,11 +2,30 @@
 #include "stb_image.h"
 #include "Camera.h"
 #include "Collision.h"
+#include "imgui/imgui.h"
+#include "imgui/imgui_impl_glfw.h"
+#include "imgui/imgui_impl_opengl3.h"
 
+#if defined(IMGUI_IMPL_OPENGL_LOADER_GL3W)
+#include <GL/gl3w.h>    // Initialize with gl3wInit()
+#elif defined(IMGUI_IMPL_OPENGL_LOADER_GLEW)
+#include <GL/glew.h>    // Initialize with glewInit()
+#elif defined(IMGUI_IMPL_OPENGL_LOADER_GLAD)
+#include <glad/glad.h>  // Initialize with gladLoadGL()
+#else
+#include IMGUI_IMPL_OPENGL_LOADER_CUSTOM
+#endif
+
+#include <glfw3.h>
+
+
+ImVector<char*> chat;
 float scale = 0.01f;
 double lastX = SCR_WIDTH / 2.0f;
 double lastY = SCR_HEIGHT / 2.0f;
 bool firstMouse = true;
+const char* glsl_version = "#version 330";
+
 
 //Holds position of object
 glm::vec3 position(0.0f);
@@ -35,6 +54,29 @@ int main()
 		return -1;
 	}
 	glfwMakeContextCurrent(window);
+
+	#if defined(IMGUI_IMPL_OPENGL_LOADER_GL3W)
+		bool err = gl3wInit() != 0;
+	#elif defined(IMGUI_IMPL_OPENGL_LOADER_GLEW)
+	bool err = glewInit() != GLEW_OK;
+	#elif defined(IMGUI_IMPL_OPENGL_LOADER_GLAD)
+		bool err = gladLoadGL() == 0;
+	#else
+		bool err = false; // If you use IMGUI_IMPL_OPENGL_LOADER_CUSTOM, your loader is likely to requires some form of initialization.
+	#endif
+
+	IMGUI_CHECKVERSION();
+	ImGui::CreateContext();
+	ImGuiIO& io = ImGui::GetIO(); (void)io;
+	ImGui_ImplGlfw_InitForOpenGL(window, true);
+	ImGui_ImplOpenGL3_Init(glsl_version);
+
+	/*ImGui_ImplGlfw_InitForOpenGl(window, true);
+	ImGui_ImplOpenGL2_Init();*/
+	ImGui::StyleColorsDark();
+	bool show_demo_window = true;
+	bool show_another_window = false;
+	ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
 	//Set mouse movement
 	glfwSetCursorPosCallback(window, mouse_callback);
@@ -160,11 +202,13 @@ int main()
 	//Set texture filtering parameters
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+  
 	//Free image data
 	stbi_image_free(data);
 
 	glBindTexture(GL_TEXTURE_2D, texture[1]);
 	data = stbi_load("Models/Tank_dif.jpg", &width, &height, &nrChannels, 0);
+
 	if (data)
 	{
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
@@ -189,9 +233,50 @@ int main()
 	cout << "Left: " << ourModel.getDimX()[0]*scale << ",Right: " << ourModel.getDimX()[1]*scale << endl;	
 	cout << "Front: " << ourModel.getDimZ()[0]*scale << ",Back: " << ourModel.getDimZ()[1]*scale << endl;
 
+	bool show_Fps = true;
+
 	// Render loop
 	while (!glfwWindowShouldClose(window))
 	{
+		glfwPollEvents();
+		ImGui_ImplOpenGL3_NewFrame();
+		ImGui_ImplGlfw_NewFrame();
+		ImGui::NewFrame();
+
+		if (show_Fps)
+		{
+			ImGui::SetNextWindowBgAlpha(0.35f);
+			ImGui::Begin("FPS", NULL, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoTitleBar);
+			ImGui::Text("(%.1f FPS)", ImGui::GetIO().Framerate);
+			ImGui::End();
+		}
+		if (show_Fps) {
+			ImGui::Begin("HUD", NULL, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse);
+			ImGui::SetWindowPos(ImVec2(0.0, 600), 1);
+			ImVec2 x = ImVec2(-100.0, 50.0), y = ImVec2(20.0, 20.0);
+			ImGui::Text("Insert Username Here");
+			ImGui::PushStyleColor(ImGuiCol_PlotHistogram, (ImVec4)ImColor::HSV(7.0f, 0.6f, 0.6f));
+			ImGui::ProgressBar(1.0, x, NULL);
+			ImGui::PopStyleColor();
+			ImGui::End();
+		}
+
+		if (show_Fps) {
+			char buffer[128];
+			memset(buffer, 0, sizeof(buffer));
+			ImGui::Begin("Chat", NULL, 0);
+			if (ImGui::InputText("Chat Input", buffer, IM_ARRAYSIZE(buffer), ImGuiInputTextFlags_EnterReturnsTrue)) {
+				char* s = buffer;
+				chat.push_back(_strdup(s));
+			}
+			for (int i = 0; i < chat.size(); i++) {
+				ImGui::Text(chat[i]);
+			}
+			ImGui::End();
+		}
+
+		if (show_demo_window)
+			ImGui::ShowDemoWindow(&show_demo_window);
 		// Checks inputs
 		processInput(window, position, rotation, camPosition);		
 
@@ -239,7 +324,7 @@ int main()
 		
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, texture[1]);
-
+    
 		// render the loaded model
 		glm::mat4 model = glm::mat4(1.0f);
 		float pushback = 0.05f;
@@ -274,14 +359,20 @@ int main()
 		myShader.setMat4("model", model);
 		ourModel.Draw(myShader);
 		
+		ImGui::Render();
+		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
 		// GLFW: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
 		glfwSwapBuffers(window);
-		glfwPollEvents();
 	}
 
 	//Clean up objects
 	glDeleteVertexArrays(1, &VAO);
 	glDeleteBuffers(1, &VBO);
+
+	ImGui_ImplOpenGL3_Shutdown();
+	ImGui_ImplGlfw_Shutdown();
+	ImGui::DestroyContext();
 
 	//Clean out GFLW on close
 	glfwTerminate();
