@@ -6,11 +6,26 @@
 #include "imgui/imgui_impl_glfw.h"
 #include "imgui/imgui_impl_opengl3.h"
 
+#if defined(IMGUI_IMPL_OPENGL_LOADER_GL3W)
+#include <GL/gl3w.h>    // Initialize with gl3wInit()
+#elif defined(IMGUI_IMPL_OPENGL_LOADER_GLEW)
+#include <GL/glew.h>    // Initialize with glewInit()
+#elif defined(IMGUI_IMPL_OPENGL_LOADER_GLAD)
+#include <glad/glad.h>  // Initialize with gladLoadGL()
+#else
+#include IMGUI_IMPL_OPENGL_LOADER_CUSTOM
+#endif
+
+#include <glfw3.h>
+
+
 ImVector<char*> chat;
 float scale = 0.01f;
 double lastX = SCR_WIDTH / 2.0f;
 double lastY = SCR_HEIGHT / 2.0f;
 bool firstMouse = true;
+const char* glsl_version = "#version 330";
+
 
 //Holds position of object
 glm::vec3 position(0.0f);
@@ -40,15 +55,28 @@ int main()
 	}
 	glfwMakeContextCurrent(window);
 
+	#if defined(IMGUI_IMPL_OPENGL_LOADER_GL3W)
+		bool err = gl3wInit() != 0;
+	#elif defined(IMGUI_IMPL_OPENGL_LOADER_GLEW)
+	bool err = glewInit() != GLEW_OK;
+	#elif defined(IMGUI_IMPL_OPENGL_LOADER_GLAD)
+		bool err = gladLoadGL() == 0;
+	#else
+		bool err = false; // If you use IMGUI_IMPL_OPENGL_LOADER_CUSTOM, your loader is likely to requires some form of initialization.
+	#endif
+
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
 	ImGuiIO& io = ImGui::GetIO(); (void)io;
 	ImGui_ImplGlfw_InitForOpenGL(window, true);
-	//ImGui_ImplOpenGL3_Init(glsl_version);
+	ImGui_ImplOpenGL3_Init(glsl_version);
 
+	/*ImGui_ImplGlfw_InitForOpenGl(window, true);
+	ImGui_ImplOpenGL2_Init();*/
 	ImGui::StyleColorsDark();
 	bool show_demo_window = true;
 	bool show_another_window = false;
+	ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
 	//Set mouse movement
 	glfwSetCursorPosCallback(window, mouse_callback);
@@ -341,6 +369,10 @@ int main()
 	//Clean up objects
 	glDeleteVertexArrays(1, &VAO);
 	glDeleteBuffers(1, &VBO);
+
+	ImGui_ImplOpenGL3_Shutdown();
+	ImGui_ImplGlfw_Shutdown();
+	ImGui::DestroyContext();
 
 	//Clean out GFLW on close
 	glfwTerminate();
