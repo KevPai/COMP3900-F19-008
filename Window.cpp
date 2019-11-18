@@ -275,8 +275,6 @@ int main()
 			ImGui::End();
 		}
 
-		if (show_demo_window)
-			ImGui::ShowDemoWindow(&show_demo_window);
 		// Checks inputs
 		processInput(window, position, rotation, camPosition);		
 
@@ -329,25 +327,27 @@ int main()
 		glm::mat4 model = glm::mat4(1.0f);
 		float pushback = 0.05f;
 
-		switch (checkCollision(ourModel, position, cubes[8], scale)) {
-		case 3:
-			position.z -= pushback;
-			camPosition.z += pushback;
-			break;
-		case -3:
-			position.z += pushback;
-			camPosition.z -= pushback;
-			break;
-		case 1:
-			position.x -= pushback;
-			camPosition.x += pushback;
-			break;
-		case -1:
-			position.x += pushback;
-			camPosition.x -= pushback;			
-			break;
-		case 0:					
-			break;
+		for (int i = 0; i < 10; i++) {
+			switch (checkCollision(ourModel, position, cubes[i], scale)) {
+			case 3:
+				position.z -= pushback;
+				camPosition.z += pushback;
+				break;
+			case -3:
+				position.z += pushback;
+				camPosition.z -= pushback;
+				break;
+			case 1:
+				position.x -= pushback;
+				camPosition.x += pushback;
+				break;
+			case -1:
+				position.x += pushback;
+				camPosition.x -= pushback;
+				break;
+			case 0:
+				break;
+			}
 		}
 
 		model = glm::translate(model, glm::vec3(0.0f, -0.5f, 0.0f)); // translate it down so it's at the center of the scene		
