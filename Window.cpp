@@ -275,8 +275,6 @@ int main()
 			ImGui::End();
 		}
 
-		if (show_demo_window)
-			ImGui::ShowDemoWindow(&show_demo_window);
 		// Checks inputs
 		processInput(window, position, rotation, camPosition);		
 
