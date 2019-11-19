@@ -3,7 +3,7 @@
 int checkCollision(Model player, glm::vec3& position, Cube toTest, float scale) {
 	if (boundary(position.x - toTest.getX(),
 		(position.y - toTest.getY()))) {
-		if (between((position.z + player.getDimZ()[0] * scale) - toTest.getZ(), 0.0f, 0.03f)) {
+		if (between((position.z + player.getDimZ()[0] * scale) - toTest.getZ(), -0.4f, 0.5f)) {
 			return 3;
 		}
 		else if (between((position.z + player.getDimZ()[1] * scale) - toTest.getZ(), -0.5f, 0.0f)) {
@@ -15,7 +15,7 @@ int checkCollision(Model player, glm::vec3& position, Cube toTest, float scale) 
 		if (between((position.x + player.getDimX()[0] * scale) - toTest.getX(), -0.5f, 0.0f)) {
 			return 1;
 		}
-		else if (between((position.x + player.getDimX()[1] * scale) - toTest.getX(), 0.0f, 0.5f)) {
+		else if (between((position.x + player.getDimX()[1] * scale) - toTest.getX(), -0.4f, 0.5f)) {
 			return -1;
 		}
 	}

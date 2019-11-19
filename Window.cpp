@@ -1,7 +1,9 @@
+#pragma once
 #include "Shader.h"
-#include "stb_image.h"
 #include "Camera.h"
 #include "Collision.h"
+#include "LoadTexture.h"
+#include "Plane.h"
 #include "imgui/imgui.h"
 #include "imgui/imgui_impl_glfw.h"
 #include "imgui/imgui_impl_opengl3.h"
@@ -15,9 +17,6 @@
 #else
 #include IMGUI_IMPL_OPENGL_LOADER_CUSTOM
 #endif
-
-#include <glfw3.h>
-
 
 ImVector<char*> chat;
 float scale = 0.01f;
@@ -71,8 +70,6 @@ int main()
 	ImGui_ImplGlfw_InitForOpenGL(window, true);
 	ImGui_ImplOpenGL3_Init(glsl_version);
 
-	/*ImGui_ImplGlfw_InitForOpenGl(window, true);
-	ImGui_ImplOpenGL2_Init();*/
 	ImGui::StyleColorsDark();
 	bool show_demo_window = true;
 	bool show_another_window = false;
@@ -97,135 +94,26 @@ int main()
 	glEnable(GL_DEPTH_TEST);
 
 	Shader myShader("core.vs", "core.frag");
-	
-		//3D Shape coordinates
-	float vertices[180] =
-	{
-	-0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
-	 0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
-	 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-	 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-	-0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
-	-0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
 
-	-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-	 0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-	 0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
-	 0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
-	-0.5f,  0.5f,  0.5f,  0.0f, 1.0f,
-	-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-
-	-0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-	-0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-	-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-	-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-	-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-	-0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-
-	 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-	 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-	 0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-	 0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-	 0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-	 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-
-	-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-	 0.5f, -0.5f, -0.5f,  1.0f, 1.0f,
-	 0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-	 0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-	-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-	-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-
-	-0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
-	 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-	 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-	 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-	-0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
-	-0.5f,  0.5f, -0.5f,  0.0f, 1.0f
-	};
-
-	glm::vec3 cubePositions[] = 
-	{
-	 glm::vec3(-1.0f, 0.0f, 1.0f),
-	 glm::vec3(-3.0f, 0.0f, 2.0f),
-	 glm::vec3(-2.0f, 0.0f, 4.0f),
-	 glm::vec3(0.0f, 0.0f, 6.0f),
-	 glm::vec3(-3.0f, 0.0f, 7.0f),
-	 glm::vec3(-1.0f, 0.0f, 8.0f),
-	 glm::vec3(2.0f, 0.0f, 0.0f),
-	 glm::vec3(2.0f, 0.0f, 5.0f),
-	 glm::vec3(3.0f, 0.0f, 3.0f),
-	 glm::vec3(2.0f, 0.0f, 8.0f)
-	};
-
-	//Vertex buffer object AND vertex array object
-	unsigned int VBO, VAO;
-	glGenVertexArrays(1, &VAO);
-	glGenBuffers(1, &VBO);
-
-	//Bind vertex
-	glBindVertexArray(VAO);
-
-	//Bind buffer
-	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-	//Position attribute
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
-	glEnableVertexAttribArray(0);
-
-	//Texture coord attribute
-	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
-	glEnableVertexAttribArray(2);
+	Cube cubes[10];
+	Plane myPlane;
 
 	//Load and create a texture 
-	unsigned int texture[2];
-	//Load image, create texture and generate mipmaps
-	int width, height, nrChannels;
+	unsigned int texture[3];
+	glGenTextures(3, texture);
 
-	glGenTextures(2, texture);
 	//All upcoming GL_TEXTURE_2D operations now have effect on this texture object
+
+	//Load and create a texture 
 	glBindTexture(GL_TEXTURE_2D, texture[0]);
-	unsigned char* data = stbi_load("crate.jpg", &width, &height, &nrChannels, 0);
-	if (data)
-	{
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-		glGenerateMipmap(GL_TEXTURE_2D);
-	}
-	else
-	{
-		std::cout << "Failed to load texture" << std::endl;
-	}
-	//Set the texture wrapping parameters
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	//Set texture filtering parameters
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-  
-	//Free image data
-	stbi_image_free(data);
+	LoadTexture crate("crate.jpg");
 
 	glBindTexture(GL_TEXTURE_2D, texture[1]);
-	data = stbi_load("Models/Tank_dif.jpg", &width, &height, &nrChannels, 0);
+	LoadTexture grassHill("StoneBlock.png");
 
-	if (data)
-	{
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-		glGenerateMipmap(GL_TEXTURE_2D);
-	}
-	else
-	{
-		std::cout << "Failed to load texture" << std::endl;
-	}
-	//Set the texture wrapping parameters
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	//Set texture filtering parameters
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	//Free image data
-	stbi_image_free(data);
+	//Load and create a texture 
+	glBindTexture(GL_TEXTURE_2D, texture[2]);
+	LoadTexture tank("Models/Tank_dif.jpg");
 
 	GLchar modelPath[] = "Models/Tank.obj";
 	Model ourModel(modelPath);
@@ -307,14 +195,13 @@ int main()
 		//Sets projection onto shader
 		myShader.setMat4("projection", projection);
 
-		glBindVertexArray(VAO);
-
+		cubes->bindArray();
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, texture[0]);
 
-		Cube cubes[10];
 		for (unsigned int i = 0; i < 10; i++)
 		{
+			cubes[i].draw();
 			cubes[i].move(cubePositions[i]);
 			myShader.setMat4("model", cubes[i].getModel());			
 			glDrawArrays(GL_TRIANGLES, 0, 36);
@@ -323,6 +210,15 @@ int main()
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, texture[1]);
     
+		myPlane.bindArray();
+		myPlane.draw();
+		myShader.setMat4("model", myPlane.getModel());
+		glDrawArrays(GL_TRIANGLES, 0, 6);
+		glBindVertexArray(0);
+
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, texture[2]);
+
 		// render the loaded model
 		glm::mat4 model = glm::mat4(1.0f);
 		float pushback = 0.05f;
@@ -367,8 +263,7 @@ int main()
 	}
 
 	//Clean up objects
-	glDeleteVertexArrays(1, &VAO);
-	glDeleteBuffers(1, &VBO);
+	cubes->cleanUp();
 
 	ImGui_ImplOpenGL3_Shutdown();
 	ImGui_ImplGlfw_Shutdown();

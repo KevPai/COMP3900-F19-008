@@ -28,3 +28,16 @@
 	float Cube::getZ() {
 		return z;
 	}
+
+	void Cube::draw() {
+		model = glm::mat4(1.0f);
+	}
+
+	void Cube::bindArray() {
+		glBindVertexArray(VAO);
+	}
+
+	void Cube::cleanUp() {
+		glDeleteVertexArrays(1, &VAO);
+		glDeleteBuffers(1, &VBO);
+	}
