@@ -30,7 +30,7 @@ const char* glsl_version = "#version 330";
 glm::vec3 position(0.0f);
 
 //Holds rotation of object
-glm::vec3 rotation(0.0f, 90.0f, 0.0f);
+glm::vec3 rotation(0.0f, 270.0f, 0.0f);
 
 //Holds camera position
 glm::vec3 camPosition = glm::vec3(0.0f);
@@ -202,6 +202,7 @@ int main()
 		for (unsigned int i = 0; i < 10; i++)
 		{
 			cubes[i].draw();
+			glm::scale(cubes[i].getModel(), glm::vec3(2.0f));
 			cubes[i].move(cubePositions[i]);
 			myShader.setMat4("model", cubes[i].getModel());			
 			glDrawArrays(GL_TRIANGLES, 0, 36);
