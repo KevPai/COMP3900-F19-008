@@ -62,11 +62,12 @@ private:
 
 	GLfloat mouseSensitivity;
 
+	//Change these values to move position of camera
 	void updateCameraVectors()
 	{
 		this->camPosition.y = -6.0f * sin(this->phi);
 		float zx = -6.0f * cos(this->phi);
-		this->camPosition.x = zx * sin(this->theta);
-		this->camPosition.z = zx * cos(this->theta);
+		this->camPosition.x = -zx * sin(this->theta);
+		this->camPosition.z = -zx * cos(this->theta);
 	}
 };
