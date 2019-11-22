@@ -199,11 +199,20 @@ int main()
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, texture[0]);
 
+		vector<int> cubeL;
+		float dist = 2.0f;
+
 		for (unsigned int i = 0; i < 10; i++)
 		{
 			cubes[i].draw();
 			glm::scale(cubes[i].getModel(), glm::vec3(2.0f));
 			cubes[i].move(cubePositions[i]);
+
+			if (abs(cubePositions[i].x - position.x) <= dist) {
+				if (abs(cubePositions[i].z - position.z) <= dist)
+					cubeL.push_back(i);
+			}
+
 			myShader.setMat4("model", cubes[i].getModel());			
 			glDrawArrays(GL_TRIANGLES, 0, 36);
 		}
@@ -222,9 +231,9 @@ int main()
 
 		// render the loaded model
 		glm::mat4 model = glm::mat4(1.0f);
-		float pushback = 0.05f;
+		float pushback = 0.015f;
 
-		for (int i = 0; i < 10; i++) {
+		for (int i : cubeL) {
 			switch (checkCollision(ourModel, position, cubes[i], scale)) {
 			case 3:
 				position.z -= pushback;
