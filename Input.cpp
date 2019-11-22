@@ -1,6 +1,6 @@
 #pragma once
 #include "Header.h"
-
+#define speed 0.015f
 // Process user inputs: query GLFW whether relevant keys are pressed/released this frame and react accordingly
 void processInput(GLFWwindow* window, glm::vec3& position, glm::vec3& rotation, glm::vec3& camPosition)
 {
@@ -18,18 +18,18 @@ void processInput(GLFWwindow* window, glm::vec3& position, glm::vec3& rotation, 
 	}
 
 	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
-		position.z += 0.03f * sinf(rotation.y * TO_RADIANS);
-		position.x -= 0.03f * cosf(rotation.y * TO_RADIANS);
+		position.z += speed * sinf(rotation.y * TO_RADIANS);
+		position.x -= speed * cosf(rotation.y * TO_RADIANS);
 
-		camPosition.z -= 0.03f * sinf(rotation.y * TO_RADIANS);
-		camPosition.x += 0.03f * cosf(rotation.y * TO_RADIANS);		
+		camPosition.z -= speed * sinf(rotation.y * TO_RADIANS);
+		camPosition.x += speed * cosf(rotation.y * TO_RADIANS);		
 	}
 
 	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
-		position.z -= 0.03f * sinf(rotation.y * TO_RADIANS);
-		position.x += 0.03f * cosf(rotation.y * TO_RADIANS);
+		position.z -= speed * sinf(rotation.y * TO_RADIANS);
+		position.x += speed * cosf(rotation.y * TO_RADIANS);
 
-		camPosition.z += 0.03f * sinf(rotation.y * TO_RADIANS);
-		camPosition.x -= 0.03f * cosf(rotation.y * TO_RADIANS);		
+		camPosition.z += speed * sinf(rotation.y * TO_RADIANS);
+		camPosition.x -= speed * cosf(rotation.y * TO_RADIANS);		
 	}	
 }
