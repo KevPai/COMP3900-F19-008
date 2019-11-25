@@ -96,7 +96,7 @@ int Grid::getRow(GridCell cell) {
 			}
 		}
 	}
-	return 0; // this cell is not in any row
+	return -1; // this cell is not in any row
 }
 
 int Grid::getColumn(GridCell cell) {
@@ -107,7 +107,7 @@ int Grid::getColumn(GridCell cell) {
 			}
 		}
 	}
-	return 0; // this cell is not in any column
+	return -1; // this cell is not in any column
 }
 
 GridCell Grid::getCellP(int row, int col) {

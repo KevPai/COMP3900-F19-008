@@ -54,12 +54,6 @@ void TankAI::initCellDetails(cells& cellDetails) {
 	for (int i = 0; i < localGrid.getRowsize(); i++) {
 		cellDetails[i].resize(localGrid.getColsize());
 	}
-
-	for (int i = 0; i < localGrid.getRowsize(); i++) {
-		for (int j = 0; j < localGrid.getColsize(); j++) {
-			std::cout << cellDetails[i][j].parent_i << std::endl;
-		}
-	}
 }
 
 void TankAI::tracePath(cells cellDetails, glm::vec3& position,
@@ -84,58 +78,106 @@ void TankAI::tracePath(cells cellDetails, glm::vec3& position,
 		std::pair<int, int> p = Path.top();
 		Path.pop();
 
+		int x = localGrid.getCellP(p.first, p.second).getRealX();
+		int z = localGrid.getCellP(p.first, p.second).getRealZ();
+
+		glm::vec3 dest = glm::vec3(x, 0.0f, z);
+
 		// move here since we get the coords here
+		// move(position, rotation, camPosition, dest);
+
+		// std::cout << "Path: " << p.first << p.second << std::endl;
 	}
 	
 	return;
 }
 
+Grid TankAI::getGrid() {
+	return localGrid;
+}
+
 void TankAI::move(glm::vec3& position, glm::vec3& rotation, glm::vec3& camPosition, glm::vec3 dest) {
+
+	// will have to round down positions for the tank to move point-to-point
 
 	int curX = round(position.x);
 	int curZ = round(position.z);
+	//position.x = curX, position.z = curZ;
 
 	int destX = round(dest.x);
 	int destZ = round(dest.z);
 
-	GridCell curCell = localGrid.getCellXZ(curX, curZ);
-	GridCell destCell = localGrid.getCellXZ(destX, destZ);
-
 	// saving all possible roations of the tank, tank is defaulted at 270* rotation
-	glm::vec3 top_left = glm::vec3(0.0f, 315.0f, 0.0f); //315
-	glm::vec3 top_right = glm::vec3(0.0f, 225.0f, 0.0f); //225
 
-	glm::vec3 bottom_left = glm::vec3(0.0f, 45.0f, 0.0f); //45
-	glm::vec3 bottom_right = glm::vec3(0.0f, 135.0f, 0.0f); //135
+	glm::vec3 north_west_r = glm::vec3(0.0f, 315.0f, 0.0f);
+	glm::vec3 north_east_r = glm::vec3(0.0f, 225.0f, 0.0f);
 
-	glm::vec3 forward = glm::vec3(0.0f, 270.0f, 0.0f);
-	glm::vec3 backward = glm::vec3(0.0f, 90.0f, 0.0f);
+	glm::vec3 south_west_r = glm::vec3(0.0f, 45.0f, 0.0f); 
+	glm::vec3 south_east_r = glm::vec3(0.0f, 135.0f, 0.0f);
 
-	glm::vec3 left = glm::vec3(0.0f, 0.0f, 0.0f);
-	glm::vec3 right = glm::vec3(0.0f, 180.0f, 0.0f);
+	glm::vec3 north_r = glm::vec3(0.0f, 270.0f, 0.0f);
+	glm::vec3 south_r = glm::vec3(0.0f, 90.0f, 0.0f);
+
+	glm::vec3 west_r = glm::vec3(0.0f, 0.0f, 0.0f);
+	glm::vec3 east_r = glm::vec3(0.0f, 180.0f, 0.0f);
 	
-	// check if the difference between the tank's current position is within a certain distance
-	// of the destination to go in a specified direction
-	bool diag_topleft = (position.x + 1 == dest.x && position.z + 1 == dest.z);
-	bool diag_topright = (position.x - 1 == dest.x && position.z + 1 == dest.z);
+	// check distance between position and dest points to see which direction it would go
 
-	bool diag_botleft = (position.x + 1 == dest.x && position.z - 1 == dest.z);
-	bool diag_botright = (position.x - 1 == dest.x && position.z - 1 == dest.z);
+	bool north_west = (position.x - 1 == dest.x && position.z - 1 == dest.z);
+	bool north_east = (position.x + 1 == dest.x && position.z - 1 == dest.z);
 
-	bool vert_forward = (position.x == dest.x && position.z + 1 == dest.z);
-	bool vert_backward = (position.x == dest.x && position.z - 1 == dest.z);
+	bool south_west = (position.x - 1 == dest.x && position.z + 1 == dest.z);
+	bool south_east = (position.x + 1 == dest.x && position.z + 1 == dest.z);
 
-	// x positive to the left of origin
-	bool horizontal_left = (position.x + 1 == dest.x && position.z == dest.z);
-	bool horizontal_right = (position.x - 1 == dest.x && position.z == dest.z);
+	bool north = (position.x == dest.x && position.z - 1 == dest.z);
+	bool south = (position.x == dest.x && position.z + 1 == dest.z);
+
+	bool east = (position.x + 1 == dest.x && position.z == dest.z);
+	bool west = (position.x - 1 == dest.x && position.z == dest.z);
 
 	// checking each of the 8 directions from the current cell 
 	// note: once the algo properly works, occurances of camPosition can be removed
 
 	float inc = 0.1f;
 
-	if (diag_topleft) {
-		rotation = top_left;
+	if (north_west) {
+		rotation = north_west_r;
+		for (float i = position.x, j = position.z; i >= dest.x && j >= dest.z; i += 0.1f, j -= 0.1f) {
+			position.x -= inc;
+			camPosition.x += inc;
+
+			position.z -= inc;
+			camPosition.z += inc;
+		}
+
+	}
+
+	if (north_east) {
+		rotation = north_east_r;
+		for (float i = position.x, j = position.z; i <= dest.x && j >= dest.z; i += 0.1f, j -= 0.1f) {
+			position.x += inc;
+			camPosition.x -= inc;
+
+			position.z -= inc;
+			camPosition.z += inc;
+		}
+		
+	}
+
+	if (south_west) {
+		rotation = south_west_r;
+		for (float i = position.x, j = position.z; i >= dest.x && j <= dest.z; i -= 0.1f, j += 0.1f) {
+			position.x -= inc;
+			camPosition.x += inc;
+
+			position.z += inc;
+			camPosition.z -= inc;
+		}
+
+	}
+
+	if (south_east) {
+		rotation = south_east_r;
 		for (float i = position.x, j = position.z; i <= dest.x && j <= dest.z; i += 0.1f, j += 0.1f) {
 			position.x += inc;
 			camPosition.x -= inc;
@@ -146,53 +188,8 @@ void TankAI::move(glm::vec3& position, glm::vec3& rotation, glm::vec3& camPositi
 
 	}
 
-	if (diag_topright) {
-		rotation = top_right;
-		for (float i = position.x, j = position.z; i >= dest.x && j <= dest.z; i -= 0.1f, j += 0.1f) {
-			position.x -= inc;
-			camPosition.x += inc;
-
-			position.z += inc;
-			camPosition.z -= inc;
-		}
-		
-	}
-
-	if (diag_botleft) {
-		rotation = bottom_left;
-		for (float i = position.x, j = position.z; i <= dest.x && j >= dest.z; i += 0.1f, j -= 0.1f) {
-			position.x += inc;
-			camPosition.x -= inc;
-
-			position.z -= inc;
-			camPosition.z += inc;
-		}
-
-	}
-
-	if (diag_botright) {
-		rotation = bottom_right;
-		for (float i = position.x, j = position.z; i >= dest.x && j >= dest.z; i -= 0.1f, j -= 0.1f) {
-			position.x -= inc;
-			camPosition.x += inc;
-
-			position.z -= inc;
-			camPosition.z += inc;
-		}
-
-	}
-
-	if (vert_forward) {
-		rotation = forward;
-		for (float i = position.z; i <= dest.z; i += 0.1f) {
-			position.z += inc;
-			camPosition.z -= inc;
-		}
-
-	}
-
-	if (vert_backward) {
-		rotation = backward;
+	if (north) {
+		rotation = north_r;
 		for (float i = position.z; i >= dest.z; i -= 0.1f) {
 			position.z -= inc;
 			camPosition.z += inc;
@@ -200,20 +197,29 @@ void TankAI::move(glm::vec3& position, glm::vec3& rotation, glm::vec3& camPositi
 
 	}
 
-	if (horizontal_left) {
-		rotation = left;
-		for (float i = position.x; i <= dest.x; i += 0.1f) {
-			position.x += inc;
-			camPosition.x -= inc;
+	if (south) {
+		rotation = south_r;
+		for (float i = position.z; i <= dest.z; i += 0.1f) {
+			position.z += inc;
+			camPosition.z -= inc;
 		}
 
 	}
 
-	if (horizontal_right) {
-		rotation = right;
+	if (west) {
+		rotation = west_r;
 		for (float i = position.x; i >= dest.x; i -= 0.1f) {
 			position.x -= inc;
 			camPosition.x += inc;
+		}
+
+	}
+
+	if (east) {
+		rotation = east_r;
+		for (float i = position.x; i <= dest.x; i += 0.1f) {
+			position.x += inc;
+			camPosition.x -= inc;
 		}
 
 	}
@@ -234,13 +240,11 @@ void TankAI::performSearch(glm::vec3& position, glm::vec3& rotation, glm::vec3& 
 	GridCell destCell = localGrid.getCellXZ(destX, destZ);
 
 	// reference to the row/col of cells
-	int srcRow = localGrid.getRow(srcCell);
+	int srcRow = localGrid.getRow(srcCell); 
 	int srcCol = localGrid.getColumn(srcCell);
 
 	int destRow = localGrid.getRow(destCell);
 	int destCol = localGrid.getColumn(destCell);
-
-	initCellDetails(cellDetails);
 
 	if (isValid(srcRow, srcCol) == false) {
 		std::cout << "src invalid" << std::endl;
@@ -262,6 +266,18 @@ void TankAI::performSearch(glm::vec3& position, glm::vec3& rotation, glm::vec3& 
 		std::cout << "we are already at the destination" << std::endl;
 		return;
 	}
+
+	std::vector<std::vector<bool>> closedList;
+	closedList.resize(localGrid.getRowsize());
+	for (int i = 0; i < localGrid.getRowsize(); i++) {
+		closedList[i].resize(localGrid.getColsize());
+	}
+	//std::fill(closedList.begin(), closedList.end(), false);
+
+	//cells cellDetails;
+	//initCellDetails(cellDetails);
+
+	int i, j;
 
 	// check forward (north) direction
 	// check backward (south) direction

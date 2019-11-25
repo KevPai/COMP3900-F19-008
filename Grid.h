@@ -39,7 +39,7 @@ public:
 	int getColsize() const;
 
 	GridCell getCellXZ(int x, int z); // get cell based on actual coordinates
-	GridCell getCellP(int row, int col); // get cell based on its position in the grid
+	GridCell getCellP(int row, int col); // get cell based on its row, col position in the grid
 
 	int getRow(GridCell cell); // get the row that this cell is in
 	int getColumn(GridCell cell); // get the column that this cell is in
