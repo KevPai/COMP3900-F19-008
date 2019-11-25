@@ -49,13 +49,6 @@ double TankAI::calculateHValue(int row, int col, GridCell dest) {
 		+ (col-destCol)*(col-destCol)));
 }
 
-void TankAI::initCellDetails(cells& cellDetails) {
-	cellDetails.resize(localGrid.getRowsize());
-	for (int i = 0; i < localGrid.getRowsize(); i++) {
-		cellDetails[i].resize(localGrid.getColsize());
-	}
-}
-
 void TankAI::tracePath(cells cellDetails, glm::vec3& position,
 		glm::vec3& rotation, glm::vec3& camPosition, GridCell dest) {
 
@@ -86,7 +79,7 @@ void TankAI::tracePath(cells cellDetails, glm::vec3& position,
 		// move here since we get the coords here
 		// move(position, rotation, camPosition, dest);
 
-		// std::cout << "Path: " << p.first << p.second << std::endl;
+		std::cout << "Path: " << p.first << p.second << std::endl;
 	}
 	
 	return;
@@ -272,12 +265,71 @@ void TankAI::performSearch(glm::vec3& position, glm::vec3& rotation, glm::vec3& 
 	for (int i = 0; i < localGrid.getRowsize(); i++) {
 		closedList[i].resize(localGrid.getColsize());
 	}
-	//std::fill(closedList.begin(), closedList.end(), false);
+	//std::fill(&closedList[0][0], &closedList[0][0] + sizeof(closedList), false);
+	memset(&closedList[0][0], false, sizeof(closedList));
 
-	//cells cellDetails;
-	//initCellDetails(cellDetails);
+	cells cellDetails;
+	cellDetails.resize(localGrid.getRowsize());
+	for (int i = 0; i < localGrid.getRowsize(); i++) {
+		cellDetails[i].resize(localGrid.getColsize());
+	}
 
 	int i, j;
+	for (i = 0; i < localGrid.getRowsize(); i++) {
+		for (j = 0; j < localGrid.getColsize(); j++) {
+			cellDetails[i][j].f = FLT_MAX;
+			cellDetails[i][j].g = FLT_MAX;
+			cellDetails[i][j].h = FLT_MAX;
+			cellDetails[i][j].parent_i = -1;
+			cellDetails[i][j].parent_j = -1;
+		}
+	}
+
+	i = srcRow; j = srcCol;
+	cellDetails[i][j].f = 0.0;
+	cellDetails[i][j].g = 0.0;
+	cellDetails[i][j].h = 0.0;
+	cellDetails[i][j].parent_i = i;
+	cellDetails[i][j].parent_j = j;
+
+	std::set<pPair> openList;
+	openList.insert(std::make_pair(0.0, std::make_pair(i, j)));
+
+	bool foundDest = false;
+
+	while (!openList.empty()) {
+		pPair p = *openList.begin();
+
+		openList.erase(openList.begin());
+
+		i = p.second.first;
+		j = p.second.second;
+		closedList[i][j] = true;
+
+		for (int z = -1; z <= 1; z++) {
+			for (int x = -1; x <= 1; x++) {
+				double gNew, hNew, fNew;
+				
+				// process this cell if its valid
+				if (isValid(z + i, x + j) == true) {
+					// if the destination cell is the same as its current successor
+					if (isDestination(z + i, x + j, destCell) == true) {
+						// set parent of the destination cell
+						cellDetails[z + i][x + j].parent_i = i;
+						cellDetails[z + i][x + j].parent_j = j;
+						tracePath(cellDetails, position, rotation, camPosition, destCell);
+						foundDest = true;
+						return;
+					}
+					else if (closedList[z + i][x + j] == false && isUnblocked(z + i, x + j)) {
+						gNew = cellDetails[i][j].g + 1.0;
+						hNew = calculateHValue(z + i, x + j, destCell);
+						fNew = gNew + hNew;
+					}
+				} 
+			}
+		}
+	}
 
 	// check forward (north) direction
 	// check backward (south) direction

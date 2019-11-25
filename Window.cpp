@@ -130,7 +130,7 @@ int main()
 	TankAI tankAI(31, 31, cubeSize);
 	glm::vec3 src = glm::vec3(0.0f, 0.0f, 0.0f);
 	glm::vec3 dest = glm::vec3(4.0f, 0.0f, -6.0f);
-	tankAI.performSearch(position, rotation, camPosition, src, dest);
+	//tankAI.performSearch(position, rotation, camPosition, src, dest);
 
 	// Render loop
 	while (!glfwWindowShouldClose(window))
@@ -278,7 +278,7 @@ int main()
 		glm::vec3 S = glm::vec3(0.0f, 0.0f, 1.0f);
 		glm::vec3 W = glm::vec3(-1.0f, 0.0f, 0.0f);
 		glm::vec3 E = glm::vec3(1.0f, 0.0f, 0.0f);
-		//tankAI.move(position, rotation, camPosition, E);
+		//tankAI.move(position, rotation, camPosition, NW);
 		//tankAI.performSearch(position, rotation, camPosition, src, dest);
 		//cout << position.x << "," << position.z << endl;
 		

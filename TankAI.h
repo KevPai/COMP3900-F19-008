@@ -8,13 +8,14 @@
 class TankAI
 {
 private:
+	// keeps track of <row, col> from the grid
 	typedef std::pair<int, int> Pair;
+	// keeps track of <f, <i, j>> of a CellDetails cell
 	typedef std::pair<double, std::pair<int, int>> pPair;
+	// shorthand for this 2d vector
 	typedef std::vector<std::vector<CellDetails>> cells;
 
 	Grid localGrid;
-
-	void initCellDetails(cells& cellDetails); // initalize size of cellDetails vector
 
 	bool isValid(int row, int col); // check if this cell is is a valid cell 
 	bool isUnblocked(int row, int col); // check if given cell is blocked or not
