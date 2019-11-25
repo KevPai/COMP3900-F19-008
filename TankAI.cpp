@@ -1,47 +1,25 @@
 #include "TankAI.h"
 
-TankAI::TankAI(glm::vec3 cubePositions[], int cubesSize) {
-	for (int i = 0; i < cubesSize; i++) {
-		cubes.push_back(cubePositions[i]);
-	}
-	initGrid();
+TankAI::TankAI(int rows, int cols, int cubesSize) {
+
+	Grid grid(rows, cols, cubesSize);
+	grid.initGrid();
+	grid.initObjectPos();
+	grid.printGrid();
+	localGrid = grid;
 }
 
 int TankAI::round(float f) {
 	return f + (f < 0 ? -0.5 : +0.5);
 }
 
-/*void TankAI::printGrid() {
-	for (int r = 0; r < ROW; r++) {
-		std::cout << "\t";
-		for (int c = 0; c < COL; c++) {
-			std::cout << grid[r][c] << " ";
-		}
-		std::cout << std::endl;
-	}
-}*/
-
-void TankAI::initGrid() {
-	for (int r = 0; r < ROW; r++) {
-		for (int c = 0; c < COL; c++) {
-			grid[r][c] = 1;
-		}
-	}
-
-	for (size_t i = 0; i < cubes.size(); i++) {
-		int cubeX = (int)cubes[i].x;
-		int cubeZ = (int)cubes[i].z;
-
-		grid[cubeX][cubeZ] = 0;
-	}
+bool TankAI::isValid(int row, int col) {
+	return (row >= 0) && (row < localGrid.getRowsize()) 
+		&& (col >= 0) && (col < localGrid.getColsize());
 }
 
-bool TankAI::isValid(float x, float z) {
-	return (x >= 0) && (x < ROW) && (z >= 0) && (z < COL);
-}
-
-bool TankAI::isUnblocked(int x, int z) {
-	if (grid[x][z] == 1) {
+bool TankAI::isUnblocked(int row, int col) {
+	if (localGrid.getCellP(row, col).getStatus() == 1) {
 		return true;
 	}
 	else {
@@ -49,8 +27,12 @@ bool TankAI::isUnblocked(int x, int z) {
 	}
 }
 
-bool TankAI::isDestination(int x, int z, glm::vec3 dest) {
-	if (x == round(dest.x) && z == round(dest.z)) {
+bool TankAI::isDestination(int row, int col, GridCell dest) {
+
+	int destRow = localGrid.getRow(dest);
+	int destCol = localGrid.getColumn(dest);
+
+	if (row == destRow && col == destCol) {
 		return true;
 	}
 	else {
@@ -58,57 +40,79 @@ bool TankAI::isDestination(int x, int z, glm::vec3 dest) {
 	}
 }
 
-double TankAI::calculateHValue(int x, int z, glm::vec3 dest) {
-	return ((double) sqrt ((x-round(dest.x))*(x-round(dest.x)) 
-		+ (z-round(dest.z))*(z-round(dest.z))));
+double TankAI::calculateHValue(int row, int col, GridCell dest) {
+	
+	int destRow = localGrid.getRow(dest);
+	int destCol = localGrid.getColumn(dest);
+
+	return ((double) sqrt ((row-destRow)*(row-destRow) 
+		+ (col-destCol)*(col-destCol)));
 }
 
-void TankAI::tracePath(Cell cellDetails[][COL], glm::vec3& position, glm::vec3& rotation, glm::vec3& camPosition, glm::vec3 dest) {
-	int row = round(dest.x);
-	int col = round(dest.z);
+void TankAI::initCellDetails(cells& cellDetails) {
+	cellDetails.resize(localGrid.getRowsize());
+	for (int i = 0; i < localGrid.getRowsize(); i++) {
+		cellDetails[i].resize(localGrid.getColsize());
+	}
 
-	std::stack<glm::vec3> Path;
+	for (int i = 0; i < localGrid.getRowsize(); i++) {
+		for (int j = 0; j < localGrid.getColsize(); j++) {
+			std::cout << cellDetails[i][j].parent_i << std::endl;
+		}
+	}
+}
 
-	while (!(cellDetails[row][col].parent_x == row 
-		&& cellDetails[row][col].parent_z == col)) {
-		Path.push(glm::vec3(row, 0, col));
-		int temp_row = cellDetails[row][col].parent_x;
-		int temp_col = cellDetails[row][col].parent_z;
+void TankAI::tracePath(cells cellDetails, glm::vec3& position,
+		glm::vec3& rotation, glm::vec3& camPosition, GridCell dest) {
+
+	int row = localGrid.getRow(dest);
+	int col = localGrid.getColumn(dest);
+
+	std::stack<Pair> Path;
+
+	while (!(cellDetails[row][col].parent_i == row
+		&& cellDetails[row][col].parent_j == col)) {
+		Path.push(std::make_pair(row, col));
+		int temp_row = cellDetails[row][col].parent_i;
+		int temp_col = cellDetails[row][col].parent_j;
 		row = temp_row;
 		col = temp_col;
 	}
 
-	Path.push(glm::vec3(row, 0, col));
+	Path.push(std::make_pair(row, col));
 	while (!Path.empty()) {
-		glm::vec3 current = Path.top();
+		std::pair<int, int> p = Path.top();
 		Path.pop();
 
-		// do the moving here
-		// move(position, rotation, camPosition, current);
+		// move here since we get the coords here
 	}
-
-	return;
 	
+	return;
 }
 
 void TankAI::move(glm::vec3& position, glm::vec3& rotation, glm::vec3& camPosition, glm::vec3 dest) {
 
-	if (round(position.x == dest.x) && round(position.z == dest.z)) {
-		return;
-	}
+	int curX = round(position.x);
+	int curZ = round(position.z);
 
-	// saving all possible roations of the tank, tank is defaulted at 90* rotation
-	glm::vec3 top_left = glm::vec3(0.0f, 135.0f, 0.0f);
-	glm::vec3 top_right = glm::vec3(0.0f, 45.0f, 0.0f);
+	int destX = round(dest.x);
+	int destZ = round(dest.z);
 
-	glm::vec3 bottom_left = glm::vec3(0.0f, 225.0f, 0.0f);
-	glm::vec3 bottom_right = glm::vec3(0.0f, 315.0f, 0.0f);
+	GridCell curCell = localGrid.getCellXZ(curX, curZ);
+	GridCell destCell = localGrid.getCellXZ(destX, destZ);
 
-	glm::vec3 forward = glm::vec3(0.0f, 90.0f, 0.0f);
-	glm::vec3 backward = glm::vec3(0.0f, 270.0f, 0.0f);
+	// saving all possible roations of the tank, tank is defaulted at 270* rotation
+	glm::vec3 top_left = glm::vec3(0.0f, 315.0f, 0.0f); //315
+	glm::vec3 top_right = glm::vec3(0.0f, 225.0f, 0.0f); //225
 
-	glm::vec3 left = glm::vec3(0.0f, 180.0f, 0.0f);
-	glm::vec3 right = glm::vec3(0.0f, 0.0f, 0.0f);
+	glm::vec3 bottom_left = glm::vec3(0.0f, 45.0f, 0.0f); //45
+	glm::vec3 bottom_right = glm::vec3(0.0f, 135.0f, 0.0f); //135
+
+	glm::vec3 forward = glm::vec3(0.0f, 270.0f, 0.0f);
+	glm::vec3 backward = glm::vec3(0.0f, 90.0f, 0.0f);
+
+	glm::vec3 left = glm::vec3(0.0f, 0.0f, 0.0f);
+	glm::vec3 right = glm::vec3(0.0f, 180.0f, 0.0f);
 	
 	// check if the difference between the tank's current position is within a certain distance
 	// of the destination to go in a specified direction
@@ -218,62 +222,46 @@ void TankAI::move(glm::vec3& position, glm::vec3& rotation, glm::vec3& camPositi
 
 void TankAI::performSearch(glm::vec3& position, glm::vec3& rotation, glm::vec3& camPosition, glm::vec3 src, glm::vec3 dest) {
 
+	// referencing to positions
 	int srcX = round(src.x);
 	int srcZ = round(src.z);
 
 	int destX = round(dest.x);
 	int destZ = round(dest.z);
 
-	if (isValid(src.x, src.z) == false) {
+	// reference to the cells
+	GridCell srcCell = localGrid.getCellXZ(srcX, srcZ);
+	GridCell destCell = localGrid.getCellXZ(destX, destZ);
+
+	// reference to the row/col of cells
+	int srcRow = localGrid.getRow(srcCell);
+	int srcCol = localGrid.getColumn(srcCell);
+
+	int destRow = localGrid.getRow(destCell);
+	int destCol = localGrid.getColumn(destCell);
+
+	initCellDetails(cellDetails);
+
+	if (isValid(srcRow, srcCol) == false) {
 		std::cout << "src invalid" << std::endl;
 		return;
 	}
-	if (isValid(dest.x, dest.z) == false) {
+	if (isValid(destRow, destCol) == false) {
 		std::cout << "dest invalid" << std::endl;
 		return;
 	}
-	if (isUnblocked(srcX, srcZ) == false) {
+	if (isUnblocked(srcRow, srcCol) == false) {
 		std::cout << "src is blocked" << std::endl;
 		return;
 	}
-	if (isUnblocked(destX, destZ) == false) {
+	if (isUnblocked(destRow, destCol) == false) {
 		std::cout << "dest is blocked" << std::endl;
 		return;
 	}
-	if (isDestination(srcX, srcZ, dest) == true) {
+	if (isDestination(srcRow, srcCol, destCell) == true) {
 		std::cout << "we are already at the destination" << std::endl;
 		return;
 	}
-
-	bool closedList[ROW][COL];
-	memset(closedList, false, sizeof(closedList));
-
-	Cell cellDetails[ROW][COL];
-
-	int i, j;
-
-	for (i = 0; i < ROW; i++) {
-		for (j = 0; j < COL; j++) {
-			cellDetails[i][j].f = FLT_MAX;
-			cellDetails[i][j].g = FLT_MAX;
-			cellDetails[i][j].h = FLT_MAX;
-			cellDetails[i][j].parent_x = -1;
-			cellDetails[i][j].parent_z = -1;
-		}
-	}
-
-	i = srcX; 
-	j = srcZ;
-	cellDetails[i][j].f = 0.0;
-	cellDetails[i][j].g = 0.0;
-	cellDetails[i][j].h = 0.0;
-	cellDetails[i][j].parent_x = i;
-	cellDetails[i][j].parent_z = j;
-
-	std::set<pPair> openList;
-	openList.insert(std::make_pair(0.0, std::make_pair(i, j)));
-
-	bool foundDest = false;
 
 	// check forward (north) direction
 	// check backward (south) direction
