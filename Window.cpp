@@ -243,6 +243,12 @@ int main()
 				position.z += pushback;
 				camPosition.z -= pushback;
 				break;
+			case 0:
+				break;
+			}
+		}
+		for (int i : cubeL) {
+			switch (checkCollision(ourModel, position, cubes[i], scale)) {
 			case 1:
 				position.x -= pushback;
 				camPosition.x += pushback;
@@ -255,7 +261,6 @@ int main()
 				break;
 			}
 		}
-
 		model = glm::translate(model, glm::vec3(0.0f, -0.5f, 0.0f)); // translate it down so it's at the center of the scene		
 		model = glm::translate(model, glm::vec3(position));
 		model = glm::rotate(model, glm::radians(270.0f), glm::vec3(0.0f, 1.0f, 0.0f));
