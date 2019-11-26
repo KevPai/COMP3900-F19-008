@@ -4,9 +4,12 @@
 #include "Collision.h"
 #include "LoadTexture.h"
 #include "Plane.h"
+#include "TankAI.h"
 #include "imgui/imgui.h"
 #include "imgui/imgui_impl_glfw.h"
 #include "imgui/imgui_impl_opengl3.h"
+#include "Client.h"
+#include <thread>
 
 #if defined(IMGUI_IMPL_OPENGL_LOADER_GL3W)
 #include <GL/gl3w.h>    // Initialize with gl3wInit()
@@ -18,17 +21,34 @@
 #include IMGUI_IMPL_OPENGL_LOADER_CUSTOM
 #endif
 
+//chat vector
 ImVector<char*> chat;
+
+vector<glm::mat4> playerModel;
+vector<int> playerId;
+vector<glm::vec3> playerPosition;
+vector<glm::vec3> playerRotation;
+glm::vec3 tempPos;
+glm::vec3 tempRot;
+bool chatMode;
+
 float scale = 0.01f;
 double lastX = SCR_WIDTH / 2.0f;
 double lastY = SCR_HEIGHT / 2.0f;
 bool firstMouse = true;
 const char* glsl_version = "#version 330";
 
+//Server Stuff
+Client client;
+thread readthread, writethread;
+char username[50];
+
+int playerNumber;
+int playerCount;
+//Player stuff
 
 //Holds position of object
 glm::vec3 position(0.0f);
-
 //Holds rotation of object
 glm::vec3 rotation(0.0f, 270.0f, 0.0f);
 
@@ -37,7 +57,110 @@ glm::vec3 camPosition = glm::vec3(0.0f);
 
 Camera camera(position);
 
-int main()
+void readFunc() {
+	//myserver.UpdateRecv();
+	glm::vec3 playerPos(0.0f);
+	glm::vec3 playerRot(0.0f, 90.0f, 0.0f);
+	while (client.isClientRunning) {
+		cout << playerNumber << endl;
+		char message[256];
+		string update = client.updatePos();
+		stringstream ss(update);
+		string encode;
+		size_t pos = 0;
+		ostringstream oss;
+		int id;
+		float posx, posy, posz, rotx, roty, rotz;
+		char* s;
+		int code = 0;
+		ss >> code;
+		if (!update.empty()) {
+			//cout << "recieved a message" << endl;
+			switch (code) {
+			case 0: //login message
+				encode = update.substr(update.find(" ") + 1);
+				memset(message, 0, sizeof(message));
+				strcpy_s(message, encode.c_str());
+				cout << encode << endl;
+				s = message;
+				chat.push_back(_strdup(s));
+
+				if (client.isserver()) {
+					//add new player information
+					cout << "spawning new player" << endl;
+					playerCount++;
+					playerId.push_back(playerCount);
+					playerPosition.push_back(playerPos);
+					playerRotation.push_back(playerRot);
+					glm::mat4 tank;
+					playerModel.push_back(tank);
+					//assign player information to stuff
+					oss << 3 << " " << playerCount;
+					cout << oss.str() << endl;
+					client.BroadCastMessageToAll(oss.str());
+					for (int i = 0; i < playerId.size(); i++) {
+						oss.str("");
+						oss << 4 << " " << playerId[i] << " " << playerPosition[i].x << " " << playerPosition[i].y << " " << playerPosition[i].z
+							<< " " << playerRotation[i].x << " " << playerRotation[i].y << " " << playerRotation[i].z;
+						client.BroadCastMessageToAll(oss.str());
+					}
+				}
+				break;
+			case 1: //message
+				encode = update.substr(update.find(" ") + 1);
+				memset(message, 0, sizeof(message));
+				strcpy_s(message, encode.c_str());
+				cout << encode << endl;
+				s = message;
+				chat.push_back(_strdup(s));
+				break;
+			case 3: //sent player info |3|PlayerNumber|
+				encode = update.substr(update.find(" ") + 1);
+				if (playerNumber == NULL) {
+					playerNumber = stoi(encode);
+				}
+				break;
+			case 4: //initialize positions in clients
+				encode = update.substr(update.find(" " + 1));
+				ss.str("");
+				ss.str(encode);
+				ss >> id >> posx >> posy >> posz >> rotx >> roty >> rotz;
+				//cout << ss.str() << endl;
+				//cout << id << posx << posy << posz << rotx << roty << rotz;s
+				glm::vec3 position;
+				glm::vec3 rotation;
+				glm::mat4 tank;
+				position.x = posx;
+				position.y = posy;
+				position.z = posz;
+				rotation.x = rotx;
+				rotation.y = roty;
+				rotation.z = rotz;
+				playerId.push_back(id);
+				playerModel.push_back(tank);
+				playerPosition.push_back(position);
+				playerRotation.push_back(rotation);
+				break;
+			case 5: //update position 4 playerid position rotation
+				encode = update.substr(update.find(" ") + 1);
+				ss.str("");
+				ss.str(encode);
+				ss >> id >> posx >> posy >> posz >> rotx >> roty >> rotz;
+				playerPosition[id].x = posx;
+				playerPosition[id].y = posy;
+				playerPosition[id].z = posz;
+
+				playerRotation[id].x = rotx;
+				playerRotation[id].y = roty;
+				playerRotation[id].z = rotz;
+				break;
+			}
+
+		}
+	}
+}
+
+void mainThread()
 {
 	//Initialize GLFW
 	glfwInit();
@@ -50,7 +173,6 @@ int main()
 	{
 		std::cout << "Failed to create GLFW window" << std::endl;
 		glfwTerminate();
-		return -1;
 	}
 	glfwMakeContextCurrent(window);
 
@@ -84,7 +206,6 @@ int main()
 	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
 	{
 		std::cout << "Failed to initialize GLAD" << std::endl;
-		return -1;
 	}
 
 	//Size of rendering window
@@ -95,7 +216,8 @@ int main()
 
 	Shader myShader("core.vs", "core.frag");
 
-	Cube cubes[10];
+	const int cubeSize = sizeof(cubePositions) / sizeof(cubePositions[0]);
+	Cube cubes[cubeSize];
 	Plane myPlane;
 
 	//Load and create a texture 
@@ -122,6 +244,34 @@ int main()
 	cout << "Front: " << ourModel.getDimZ()[0]*scale << ",Back: " << ourModel.getDimZ()[1]*scale << endl;
 
 	bool show_Fps = true;
+	//server fills up spot of player list
+	if (client.isserver()) {
+		playerNumber = 0;
+		playerCount = 0;
+		playerId.push_back(playerNumber);
+		glm::vec3 pos(0.0f);
+		playerPosition.push_back(pos);
+		glm::vec3 rot(0.0f, 90.0f, 0.0f);
+		playerRotation.push_back(rot);
+		glm::mat4 player;
+		playerModel.push_back(player);
+	}
+
+	//login message for the host and other clients
+	if (!client.isserver()) {
+		char lmessage[256];
+		strcpy_s(lmessage, "0 ");
+		strcat_s(lmessage, username);
+		strcat_s(lmessage, " Has joined the game.");
+		client.sendMessage(_strdup(lmessage));
+	}
+
+	// AI IS HERE
+	// rows and cols in params can be changed later
+	TankAI tankAI(31, 31, cubeSize);
+	glm::vec3 src = glm::vec3(0.0f, 0.0f, 0.0f);
+	glm::vec3 dest = glm::vec3(4.0f, 0.0f, -6.0f);
+	//tankAI.performSearch(position, rotation, camPosition, src, dest);
 
 	// Render loop
 	while (!glfwWindowShouldClose(window))
@@ -150,12 +300,30 @@ int main()
 		}
 
 		if (show_Fps) {
+
 			char buffer[128];
+			char message[256];
+			char encode[256];
+			memset(message, 0, sizeof(message));
 			memset(buffer, 0, sizeof(buffer));
+
+			strcpy_s(message, username);
 			ImGui::Begin("Chat", NULL, 0);
 			if (ImGui::InputText("Chat Input", buffer, IM_ARRAYSIZE(buffer), ImGuiInputTextFlags_EnterReturnsTrue)) {
-				char* s = buffer;
+				strcat_s(message, ": ");
+				strcat_s(message, buffer);
+				char* s = message;
 				chat.push_back(_strdup(s));
+				strcpy_s(encode, "1 ");
+				strcat_s(encode, message);
+				char* t = encode;
+				if (!client.isserver())
+				{
+					client.sendMessage(t);
+				}
+				else {
+					client.BroadCastMessageToAll(t);
+				}
 			}
 			for (int i = 0; i < chat.size(); i++) {
 				ImGui::Text(chat[i]);
@@ -163,8 +331,23 @@ int main()
 			ImGui::End();
 		}
 
+		tempPos = playerPosition[playerNumber];
+		tempRot = playerRotation[playerNumber];
+
 		// Checks inputs
-		processInput(window, position, rotation, camPosition);		
+		processInput(window, playerPosition[playerNumber], playerRotation[playerNumber], camPosition);
+
+		if (tempPos != playerPosition[playerNumber] || tempRot != playerRotation[playerNumber]) {
+			ostringstream oss;
+			oss << 5 << " " << playerNumber << " " << playerPosition[playerNumber].x << " " << playerPosition[playerNumber].y << " " << playerPosition[playerNumber].z
+				<< " " << playerRotation[playerNumber].x << " " << playerRotation[playerNumber].y << " " << playerRotation[playerNumber].z;
+			if (client.isserver()) {
+				client.BroadCastMessageToAll(oss.str());
+			}
+			else {
+				client.sendMessage(oss.str());
+			}
+		}
 
 		// Rendering...
 		glClearColor(0.0f, 0.0f, 0.0f, 0.0f); //Window color
@@ -199,10 +382,8 @@ int main()
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, texture[0]);
 
-		vector<int> cubeL;
-		float dist = 2.0f;
-
-		for (unsigned int i = 0; i < 10; i++)
+		for (unsigned int i = 0; i < cubeSize; i++)
+      
 		{
 			cubes[i].draw();
 			glm::scale(cubes[i].getModel(), glm::vec3(2.0f));
@@ -230,17 +411,21 @@ int main()
 		glBindTexture(GL_TEXTURE_2D, texture[2]);
 
 		// render the loaded model
-		glm::mat4 model = glm::mat4(1.0f);
-		float pushback = 0.015f;
+		for (int i = 0; i < playerId.size(); i++) {
+			playerModel[i] = glm::mat4(1.0f);
+		}
 
-		for (int i : cubeL) {
-			switch (checkCollision(ourModel, position, cubes[i], scale)) {
+		float pushback = 0.05f;
+
+		for (int i = 0; i < 10; i++) {
+			switch (checkCollision(ourModel, playerPosition[playerNumber], cubes[i], scale)) {
+          
 			case 3:
-				position.z -= pushback;
+				playerPosition[playerNumber].z -= pushback;
 				camPosition.z += pushback;
 				break;
 			case -3:
-				position.z += pushback;
+				playerPosition[playerNumber].z += pushback;
 				camPosition.z -= pushback;
 				break;
 			case 0:
@@ -250,11 +435,11 @@ int main()
 		for (int i : cubeL) {
 			switch (checkCollision(ourModel, position, cubes[i], scale)) {
 			case 1:
-				position.x -= pushback;
+				playerPosition[playerNumber].x -= pushback;
 				camPosition.x += pushback;
 				break;
 			case -1:
-				position.x += pushback;
+				playerPosition[playerNumber].x += pushback;
 				camPosition.x -= pushback;
 				break;
 			case 0:
@@ -267,8 +452,34 @@ int main()
 		model = glm::rotate(model, glm::radians(rotation.y), glm::vec3(0.0f, 1.0f, 0.0f));
 		model = glm::scale(model, glm::vec3(scale, scale, scale));	// it's a bit too big for our scene, so scale it down
 
-		myShader.setMat4("model", model);
-		ourModel.Draw(myShader);
+		for (int i = 0; i < playerId.size(); i++) {
+			//cout << i << endl;
+			playerModel[i] = glm::translate(playerModel[i], glm::vec3(0.0f, -0.5f, 0.0f)); // translate it down so it's at the center of the scene		
+			playerModel[i] = glm::translate(playerModel[i], glm::vec3(playerPosition[i]));
+			playerModel[i] = glm::rotate(playerModel[i], glm::radians(270.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+			playerModel[i] = glm::rotate(playerModel[i], glm::radians(playerRotation[i].y), glm::vec3(0.0f, 1.0f, 0.0f));
+			playerModel[i] = glm::scale(playerModel[i], glm::vec3(scale, scale, scale));	// it's a bit too big for our scene, so scale it down
+
+			myShader.setMat4("model", playerModel[i]);
+			ourModel.Draw(myShader);
+		}
+
+		// DO AI STUFF HERE
+
+		glm::vec3 src = glm::vec3(0.0f, 0.0f, 0.0f);
+		glm::vec3 dest = glm::vec3(4.0f, 0.0f, -6.0f);
+
+		glm::vec3 NW = glm::vec3(-1.0f, 0.0f, -1.0f);
+		glm::vec3 NE = glm::vec3(1.0f, 0.0f, -1.0f);
+		glm::vec3 SW = glm::vec3(-1.0f, 0.0f, 1.0f);
+		glm::vec3 SE = glm::vec3(1.0f, 0.0f, 1.0f);
+		glm::vec3 N = glm::vec3(0.0f, 0.0f, -1.0f);
+		glm::vec3 S = glm::vec3(0.0f, 0.0f, 1.0f);
+		glm::vec3 W = glm::vec3(-1.0f, 0.0f, 0.0f);
+		glm::vec3 E = glm::vec3(1.0f, 0.0f, 0.0f);
+		//tankAI.move(position, rotation, camPosition, NW);
+		//tankAI.performSearch(position, rotation, camPosition, src, dest);
+		//cout << position.x << "," << position.z << endl;
 		
 		ImGui::Render();
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
@@ -286,6 +497,29 @@ int main()
 
 	//Clean out GFLW on close
 	glfwTerminate();
+}
+
+int main() {
+
+	std::cout << "Enter User Name" << endl;
+	std::cin >> username;
+	std::cout << " \"Join\" or \"Host\"" << endl;
+	string message;
+	std::cin >> message;
+	if (message == "host") {
+		client.createServer();
+		readthread = thread(readFunc);
+		writethread = thread(mainThread);
+	}
+	else if (message == "join")
+	{
+		client.createClient();
+		readthread = thread(readFunc);
+		writethread = thread(mainThread);
+	}
+	readthread.join();
+	writethread.join();
+
 	return 0;
 }
 
