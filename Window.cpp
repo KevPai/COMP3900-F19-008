@@ -428,6 +428,12 @@ void mainThread()
 				playerPosition[playerNumber].z += pushback;
 				camPosition.z -= pushback;
 				break;
+			case 0:
+				break;
+			}
+		}
+		for (int i : cubeL) {
+			switch (checkCollision(ourModel, position, cubes[i], scale)) {
 			case 1:
 				playerPosition[playerNumber].x -= pushback;
 				camPosition.x += pushback;
@@ -440,6 +446,11 @@ void mainThread()
 				break;
 			}
 		}
+		model = glm::translate(model, glm::vec3(0.0f, -0.5f, 0.0f)); // translate it down so it's at the center of the scene		
+		model = glm::translate(model, glm::vec3(position));
+		model = glm::rotate(model, glm::radians(270.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+		model = glm::rotate(model, glm::radians(rotation.y), glm::vec3(0.0f, 1.0f, 0.0f));
+		model = glm::scale(model, glm::vec3(scale, scale, scale));	// it's a bit too big for our scene, so scale it down
 
 		for (int i = 0; i < playerId.size(); i++) {
 			//cout << i << endl;
