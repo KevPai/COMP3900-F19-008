@@ -25,14 +25,14 @@ const unsigned int SCR_HEIGHT = 800;
 
 const glm::vec3 cubePositions[] =
 {
- glm::vec3(-1.0f, 0.0f, -1.0f),
- glm::vec3(-3.0f, 0.0f, -2.0f),
- glm::vec3(-2.0f, 0.0f, -4.0f),
- glm::vec3(0.0f, 0.0f, -6.0f),
- glm::vec3(-3.0f, 0.0f, -7.0f),
- glm::vec3(-1.0f, 0.0f, -8.0f),
- glm::vec3(2.0f, 0.0f, 0.0f),
- glm::vec3(2.0f, 0.0f, -5.0f),
- glm::vec3(3.0f, 0.0f, -3.0f),
- glm::vec3(2.0f, 0.0f, -8.0f)
+	glm::vec3(-1.0f, 0.0f, -1.0f),
+	glm::vec3(-3.0f, 0.0f, -2.0f),
+	glm::vec3(-2.0f, 0.0f, -4.0f),
+	glm::vec3(0.0f, 0.0f, -6.0f),
+	glm::vec3(-3.0f, 0.0f, -7.0f),
+	glm::vec3(-1.0f, 0.0f, -8.0f),
+	glm::vec3(2.0f, 0.0f, 0.0f),
+	glm::vec3(2.0f, 0.0f, -5.0f),
+	glm::vec3(3.0f, 0.0f, -3.0f),
+	glm::vec3(2.0f, 0.0f, -8.0f)
 };
