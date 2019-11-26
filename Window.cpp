@@ -383,10 +383,17 @@ void mainThread()
 		glBindTexture(GL_TEXTURE_2D, texture[0]);
 
 		for (unsigned int i = 0; i < cubeSize; i++)
+      
 		{
 			cubes[i].draw();
 			glm::scale(cubes[i].getModel(), glm::vec3(2.0f));
 			cubes[i].move(cubePositions[i]);
+
+			if (abs(cubePositions[i].x - position.x) <= dist) {
+				if (abs(cubePositions[i].z - position.z) <= dist)
+					cubeL.push_back(i);
+			}
+
 			myShader.setMat4("model", cubes[i].getModel());			
 			glDrawArrays(GL_TRIANGLES, 0, 36);
 		}
@@ -412,6 +419,7 @@ void mainThread()
 
 		for (int i = 0; i < 10; i++) {
 			switch (checkCollision(ourModel, playerPosition[playerNumber], cubes[i], scale)) {
+          
 			case 3:
 				playerPosition[playerNumber].z -= pushback;
 				camPosition.z += pushback;
