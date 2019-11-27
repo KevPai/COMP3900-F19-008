@@ -20,6 +20,7 @@
 #else
 #include IMGUI_IMPL_OPENGL_LOADER_CUSTOM
 #endif
+#include <list>
 
 //chat vector
 ImVector<char*> chat;
@@ -268,9 +269,9 @@ void mainThread()
 
 	// AI IS HERE
 	// rows and cols in params can be changed later
-	TankAI tankAI(31, 31, cubeSize);
-	glm::vec3 src = glm::vec3(0.0f, 0.0f, 0.0f);
-	glm::vec3 dest = glm::vec3(4.0f, 0.0f, -6.0f);
+	//TankAI tankAI(31, 31, cubeSize);
+	//glm::vec3 src = glm::vec3(0.0f, 0.0f, 0.0f);
+	//glm::vec3 dest = glm::vec3(4.0f, 0.0f, -6.0f);
 	//tankAI.performSearch(position, rotation, camPosition, src, dest);
 
 	// Render loop
@@ -382,15 +383,17 @@ void mainThread()
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, texture[0]);
 
-		for (unsigned int i = 0; i < cubeSize; i++)
-      
+		std::list<int> cubeL;
+		float dist = 1.5f;
+
+		for (unsigned int i = 0; i < cubeSize; i++)      
 		{
 			cubes[i].draw();
 			glm::scale(cubes[i].getModel(), glm::vec3(2.0f));
-			cubes[i].move(cubePositions[i]);
+			cubes[i].move(cubePositions[i]);			
+			if (abs(cubePositions[i].x - playerPosition[playerNumber].x) <= dist) {
+				if (abs(cubePositions[i].z - playerPosition[playerNumber].z) <= dist)
 
-			if (abs(cubePositions[i].x - position.x) <= dist) {
-				if (abs(cubePositions[i].z - position.z) <= dist)
 					cubeL.push_back(i);
 			}
 
@@ -415,11 +418,9 @@ void mainThread()
 			playerModel[i] = glm::mat4(1.0f);
 		}
 
-		float pushback = 0.05f;
-
-		for (int i = 0; i < 10; i++) {
-			switch (checkCollision(ourModel, playerPosition[playerNumber], cubes[i], scale)) {
-          
+		float pushback = 0.015f;		
+		for (int i : cubeL) {
+			switch (checkCollision(ourModel, playerPosition[playerNumber], cubes[i], scale)) {          
 			case 3:
 				playerPosition[playerNumber].z -= pushback;
 				camPosition.z += pushback;
@@ -428,12 +429,6 @@ void mainThread()
 				playerPosition[playerNumber].z += pushback;
 				camPosition.z -= pushback;
 				break;
-			case 0:
-				break;
-			}
-		}
-		for (int i : cubeL) {
-			switch (checkCollision(ourModel, position, cubes[i], scale)) {
 			case 1:
 				playerPosition[playerNumber].x -= pushback;
 				camPosition.x += pushback;
@@ -444,13 +439,8 @@ void mainThread()
 				break;
 			case 0:
 				break;
-			}
+			}			
 		}
-		model = glm::translate(model, glm::vec3(0.0f, -0.5f, 0.0f)); // translate it down so it's at the center of the scene		
-		model = glm::translate(model, glm::vec3(position));
-		model = glm::rotate(model, glm::radians(270.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-		model = glm::rotate(model, glm::radians(rotation.y), glm::vec3(0.0f, 1.0f, 0.0f));
-		model = glm::scale(model, glm::vec3(scale, scale, scale));	// it's a bit too big for our scene, so scale it down
 
 		for (int i = 0; i < playerId.size(); i++) {
 			//cout << i << endl;
