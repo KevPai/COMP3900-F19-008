@@ -41,6 +41,8 @@ private:
 	glm::mat4 model;
 
 	unsigned int VBO, VAO;
+
+	//Define dimensions of cube
 	float vertices[180] =
 	{
 	-0.5f, -0.5f, -0.5f,  0.0f, 0.0f,

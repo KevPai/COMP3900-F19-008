@@ -4,6 +4,7 @@
 #include "Collision.h"
 #include "LoadTexture.h"
 #include "Plane.h"
+#include "Skybox.h"
 #include "TankAI.h"
 #include "imgui/imgui.h"
 #include "imgui/imgui_impl_glfw.h"
@@ -44,9 +45,9 @@ Client client;
 thread readthread, writethread;
 char username[50];
 
+//Player stuff
 int playerNumber;
 int playerCount;
-//Player stuff
 
 //Holds position of object
 glm::vec3 position(0.0f);
@@ -55,7 +56,6 @@ glm::vec3 rotation(0.0f, 270.0f, 0.0f);
 
 //Holds camera position
 glm::vec3 camPosition = glm::vec3(0.0f);
-
 Camera camera(position);
 
 void readFunc() {
@@ -215,11 +215,16 @@ void mainThread()
 	//Need this so cube sides do not draw over each other
 	glEnable(GL_DEPTH_TEST);
 
+	//Instantiate object shaders
 	Shader myShader("core.vs", "core.frag");
+	//Instantiate skybox shaders
+	Shader skyboxShader("skybox.vs", "skybox.frag");
 
+	//Load and bind graphic objects
 	const int cubeSize = sizeof(cubePositions) / sizeof(cubePositions[0]);
 	Cube cubes[cubeSize];
 	Plane myPlane;
+	Skybox mySkybox;
 
 	//Load and create a texture 
 	unsigned int texture[3];
@@ -227,17 +232,29 @@ void mainThread()
 
 	//All upcoming GL_TEXTURE_2D operations now have effect on this texture object
 
-	//Load and create a texture 
+	//Load crate texture from path
 	glBindTexture(GL_TEXTURE_2D, texture[0]);
 	LoadTexture crate("crate.jpg");
-
+	
+	//Load plane texture from path
 	glBindTexture(GL_TEXTURE_2D, texture[1]);
 	LoadTexture grassHill("StoneBlock.png");
 
-	//Load and create a texture 
+	//Load tank texture from path
 	glBindTexture(GL_TEXTURE_2D, texture[2]);
 	LoadTexture tank("Models/Tank_dif.jpg");
 
+	//Load skybox texture from six paths
+	vector<string> faces;
+	faces.push_back("right.jpg");
+	faces.push_back("left.jpg");
+	faces.push_back("top.jpg");
+	faces.push_back("bottom.jpg");
+	faces.push_back("front.jpg");
+	faces.push_back("back.jpg");
+	unsigned int cubemapTexture = mySkybox.loadCubemap(faces);
+
+	//Load tank model from path
 	GLchar modelPath[] = "Models/Tank.obj";
 	Model ourModel(modelPath);
 
@@ -273,6 +290,13 @@ void mainThread()
 	//glm::vec3 src = glm::vec3(0.0f, 0.0f, 0.0f);
 	//glm::vec3 dest = glm::vec3(4.0f, 0.0f, -6.0f);
 	//tankAI.performSearch(position, rotation, camPosition, src, dest);
+
+	//Configure shaders
+	myShader.Use();
+	myShader.setInt("textures", 0);
+
+	skyboxShader.Use();
+	skyboxShader.setInt("skybox", 0);
 
 	// Render loop
 	while (!glfwWindowShouldClose(window))
@@ -379,9 +403,10 @@ void mainThread()
 		//Sets projection onto shader
 		myShader.setMat4("projection", projection);
 
-		cubes->bindArray();
+		//Bind cubes and cube texture
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, texture[0]);
+		cubes->bindArray();
 
 		std::list<int> cubeL;
 		float dist = 1.5f;
@@ -401,6 +426,7 @@ void mainThread()
 			glDrawArrays(GL_TRIANGLES, 0, 36);
 		}
 		
+		//Bind plane and plane texture
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, texture[1]);
     
@@ -410,6 +436,7 @@ void mainThread()
 		glDrawArrays(GL_TRIANGLES, 0, 6);
 		glBindVertexArray(0);
 
+		//Bind model and model texture
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, texture[2]);
 
@@ -418,7 +445,8 @@ void mainThread()
 			playerModel[i] = glm::mat4(1.0f);
 		}
 
-		float pushback = 0.015f;		
+		float pushback = 0.03f;
+    
 		for (int i : cubeL) {
 			switch (checkCollision(ourModel, playerPosition[playerNumber], cubes[i], scale)) {          
 			case 3:
@@ -474,6 +502,21 @@ void mainThread()
 		ImGui::Render();
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
+		//Finally draw skybox
+		glDepthFunc(GL_LEQUAL);
+		skyboxShader.Use();
+		view = glm::mat4(glm::mat3(camera.GetViewMatrix()));
+		skyboxShader.setMat4("view", view);
+		skyboxShader.setMat4("projection", projection);
+
+		//Define skybox cube
+		mySkybox.bindArray();
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture);
+		glDrawArrays(GL_TRIANGLES, 0, 36);
+		glBindVertexArray(0);
+		glDepthFunc(GL_LESS); // set depth function back to default
+
 		// GLFW: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
 		glfwSwapBuffers(window);
 	}
@@ -513,6 +556,7 @@ int main() {
 	return 0;
 }
 
+//Proccess mouse movement for camera
 void mouse_callback(GLFWwindow* window, double xpos, double ypos)
 {
 	if (firstMouse)
