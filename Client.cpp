@@ -18,7 +18,7 @@ void Client::createClient() {
 	//serverHint.sin_addr.S_un.S_addr = htonl(INADDR_ANY);
 	serverHint.sin_family = AF_INET;
 	serverHint.sin_port = htons(5000);
-	inet_pton(AF_INET, "192.168.0.26", &serverHint.sin_addr);
+	inet_pton(AF_INET, "142.232.159.144", &serverHint.sin_addr);
 	
 	/*if (bind(out, (sockaddr*)&serverHint, sizeof(serverHint)) == SOCKET_ERROR) {
 		cout << "error " << WSAGetLastError() << endl;

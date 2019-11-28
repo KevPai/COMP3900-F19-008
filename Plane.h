@@ -17,7 +17,6 @@ public:
 
 		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
 		glEnableVertexAttribArray(2);
-		//glBindVertexArray(0);
 	}
 
 	void draw() {
@@ -38,12 +37,12 @@ private:
 	unsigned int VBO, VAO;
 
 	float planeVertices[30] = {
-		 100.0f, -0.7f,  100.0f,  2.0f, 0.0f,
-		-100.0f, -0.7f,  100.0f,  0.0f, 0.0f,
-		-100.0f, -0.7f, -100.0f,  0.0f, 2.0f,
+		 100.0f, -0.5f,  100.0f,  2.0f, 0.0f,
+		-100.0f, -0.5f,  100.0f,  0.0f, 0.0f,
+		-100.0f, -0.5f, -100.0f,  0.0f, 2.0f,
 
-		 100.0f, -0.7f,  100.0f,  2.0f, 0.0f,
-		-100.0f, -0.7f, -100.0f,  0.0f, 2.0f,
-		 100.0f, -0.7f, -100.0f,  2.0f, 2.0f
+		 100.0f, -0.5f,  100.0f,  2.0f, 0.0f,
+		-100.0f, -0.5f, -100.0f,  0.0f, 2.0f,
+		 100.0f, -0.5f, -100.0f,  2.0f, 2.0f
 	};
 };
