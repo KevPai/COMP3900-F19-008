@@ -446,7 +446,7 @@ void mainThread()
 		}
 
 		float pushback = 0.03f;
-		cout << cubeL.size() << "\n";
+    
 		for (int i : cubeL) {
 			switch (checkCollision(ourModel, playerPosition[playerNumber], cubes[i], scale)) {          
 			case 3:
