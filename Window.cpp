@@ -472,7 +472,7 @@ void mainThread()
 
 		for (int i = 0; i < playerId.size(); i++) {
 			//cout << i << endl;
-			playerModel[i] = glm::translate(playerModel[i], glm::vec3(0.0f, -0.5f, 0.0f)); // translate it down so it's at the center of the scene		
+			playerModel[i] = glm::translate(playerModel[i], glm::vec3(0.0f, -0.4f, 0.0f)); // translate it down so it's at the center of the scene		
 			playerModel[i] = glm::translate(playerModel[i], glm::vec3(playerPosition[i]));
 			playerModel[i] = glm::rotate(playerModel[i], glm::radians(270.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 			playerModel[i] = glm::rotate(playerModel[i], glm::radians(playerRotation[i].y), glm::vec3(0.0f, 1.0f, 0.0f));
