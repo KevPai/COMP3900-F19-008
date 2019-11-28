@@ -1,6 +1,6 @@
 #pragma once
 #include "Header.h"
-#define speed 0.015f
+#define speed 0.03f
 // Process user inputs: query GLFW whether relevant keys are pressed/released this frame and react accordingly
 void processInput(GLFWwindow* window, glm::vec3& position, glm::vec3& rotation, glm::vec3& camPosition)
 {
