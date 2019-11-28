@@ -418,7 +418,8 @@ void mainThread()
 			playerModel[i] = glm::mat4(1.0f);
 		}
 
-		float pushback = 0.015f;		
+		float pushback = 0.03f;
+    
 		for (int i : cubeL) {
 			switch (checkCollision(ourModel, playerPosition[playerNumber], cubes[i], scale)) {          
 			case 3:
