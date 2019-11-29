@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Header.h"
+#include "../Header.h"
 #include "GridCell.h"
 #include "CellDetails.h"
 #include <iomanip>

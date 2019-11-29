@@ -1,5 +1,5 @@
 #pragma once
-#include "Shader.h"
+#include "../Shaders/Shader.h"
 
 using namespace std;
 

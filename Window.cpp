@@ -1,15 +1,15 @@
 #pragma once
-#include "Shader.h"
-#include "Camera.h"
-#include "Collision.h"
-#include "LoadTexture.h"
-#include "Plane.h"
-#include "Skybox.h"
-#include "TankAI.h"
-#include "imgui/imgui.h"
-#include "imgui/imgui_impl_glfw.h"
-#include "imgui/imgui_impl_opengl3.h"
-#include "Client.h"
+#include "Shaders/Shader.h"
+#include "Textures/LoadTexture.h"
+#include "Objects/Plane.h"
+#include "Skybox/Skybox.h"
+#include "Input/Camera.h"
+#include "Physics/Collision.h"
+#include "AI/TankAI.h"
+#include "GUI/imgui.h"
+#include "GUI/imgui_impl_glfw.h"
+#include "GUI/imgui_impl_opengl3.h"
+#include "Networking/Client.h"
 #include <thread>
 
 #if defined(IMGUI_IMPL_OPENGL_LOADER_GL3W)
@@ -216,9 +216,9 @@ void mainThread()
 	glEnable(GL_DEPTH_TEST);
 
 	//Instantiate object shaders
-	Shader myShader("core.vs", "core.frag");
+	Shader myShader("Shaders/core.vs", "Shaders/core.frag");
 	//Instantiate skybox shaders
-	Shader skyboxShader("skybox.vs", "skybox.frag");
+	Shader skyboxShader("Shaders/skybox.vs", "Shaders/skybox.frag");
 
 	//Load and bind graphic objects
 	const int cubeSize = sizeof(cubePositions) / sizeof(cubePositions[0]);
@@ -234,24 +234,24 @@ void mainThread()
 
 	//Load crate texture from path
 	glBindTexture(GL_TEXTURE_2D, texture[0]);
-	LoadTexture crate("crate.jpg");
+	LoadTexture crate("Textures/crate.jpg");
 	
 	//Load plane texture from path
 	glBindTexture(GL_TEXTURE_2D, texture[1]);
-	LoadTexture grassHill("StoneBlock.png");
+	LoadTexture grassHill("Textures/StoneBlock.png");
 
 	//Load tank texture from path
 	glBindTexture(GL_TEXTURE_2D, texture[2]);
-	LoadTexture tank("Models/Tank_dif.jpg");
+	LoadTexture tank("Textures/Tank_dif.jpg");
 
 	//Load skybox texture from six paths
 	vector<string> faces;
-	faces.push_back("right.jpg");
-	faces.push_back("left.jpg");
-	faces.push_back("top.jpg");
-	faces.push_back("bottom.jpg");
-	faces.push_back("front.jpg");
-	faces.push_back("back.jpg");
+	faces.push_back("Textures/skybox_right.jpg");
+	faces.push_back("Textures/skybox_left.jpg");
+	faces.push_back("Textures/skybox_top.jpg");
+	faces.push_back("Textures/skybox_bottom.jpg");
+	faces.push_back("Textures/skybox_front.jpg");
+	faces.push_back("Textures/skybox_back.jpg");
 	unsigned int cubemapTexture = mySkybox.loadCubemap(faces);
 
 	//Load tank model from path

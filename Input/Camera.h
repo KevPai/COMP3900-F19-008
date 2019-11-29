@@ -1,5 +1,5 @@
 #pragma once
-#include "Header.h"
+#include "../Header.h"
 
 //Sesitivity of mouse
 const GLfloat SENSITIVITY = 0.01f;
