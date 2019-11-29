@@ -1,7 +1,0 @@
-﻿  Window.cpp
-C:\Program Files (x86)\Windows Kits\10\Include\10.0.18362.0\shared\minwindef.h(130,1): warning C4005:  'APIENTRY': macro redefinition
-C:\Users\KPai5\Desktop\BCIT Archive\OpenGL\Include\glad\glad.h(32): message :  see previous definition of 'APIENTRY'
-C:\Users\KPai5\Desktop\Engine-51\Engine-51\Window.cpp(102,24): warning C4018:  '<': signed/unsigned mismatch
-C:\Users\KPai5\Desktop\Engine-51\Engine-51\Window.cpp(444,21): warning C4018:  '<': signed/unsigned mismatch
-C:\Users\KPai5\Desktop\Engine-51\Engine-51\Window.cpp(473,21): warning C4018:  '<': signed/unsigned mismatch
-  Engine-51.vcxproj -> C:\Users\KPai5\Desktop\Engine-51\Debug\Engine-51.exe
