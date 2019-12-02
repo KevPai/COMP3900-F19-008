@@ -1,11 +1,2 @@
-﻿  Collision.cpp
-  Cube.cpp
-  Grid.cpp
-  Input.cpp
-  Model.cpp
-  TankAI.cpp
-  Window.cpp
-  Generating Code...
-C:\Users\Sebastian\Documents\Term 3\COMP3900-F19-008\Engine-51\Engine-51\TankAI.cpp(13,11): warning C4244: 'return': conversion from 'double' to 'int', possible loss of data
-C:\Users\Sebastian\Documents\Term 3\COMP3900-F19-008\Engine-51\Engine-51\Collision.cpp(22): warning C4715: 'checkCollision': not all control paths return a value
+﻿  Window.cpp
   Engine-51.vcxproj -> C:\Users\Sebastian\Documents\Term 3\COMP3900-F19-008\Engine-51\Debug\Engine-51.exe
