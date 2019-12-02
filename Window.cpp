@@ -276,7 +276,7 @@ int main()
 		ourModel.Draw(myShader);
 
 		// Iterate through movements to move the tank until it reaches final movement
-		tankAI.move(movements, move, position, rotation);
+		tankAI.move(movements, move, position, camPosition, rotation);
 		
 		ImGui::Render();
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());

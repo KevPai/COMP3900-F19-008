@@ -50,7 +50,7 @@ double TankAI::calculateHValue(int row, int col, GridCell dest) {
 }
 
 void TankAI::tracePath(cells cellDetails, glm::vec3& position,
-		glm::vec3& rotation, glm::vec3& camPosition, GridCell dest) {
+		glm::vec3& rotation, GridCell dest) {
 
 	int row = localGrid.getRow(dest);
 	int col = localGrid.getColumn(dest);
@@ -76,150 +76,170 @@ void TankAI::tracePath(cells cellDetails, glm::vec3& position,
 
 		glm::vec3 dest = glm::vec3(x, 0.0f, z);
 
-		// move here since we get the coords here
-		// move(position, rotation, camPosition, dest);
+		std::pair<int, int> real;
+		real.first = x;
+		real.second = z;
+		movements.push_back(real);
 
-		std::cout << "Path: " << p.first << p.second << std::endl;
+		std::cout << "Path: (" << p.first << ", " <<p.second << ")" << std::endl;
+		std::cout << "The real x and z of this location " << x << ", " << z << std::endl;
 	}
 	
 	return;
+}
+
+void TankAI::adjustMovements() {
+	
+	for (size_t i = 0; i < movements.size(); i++) {
+		int x = movements[i].first;
+		int z = movements[i].second;
+		//std::cout << "Altering " << x << ", " << z << std::endl;
+		if (localGrid.getCellXZ(x, z - 1).getStatus() == 0) { // north block
+			movements[i].second += 1;
+			//std::cout << "Block at" << x << ", " << z - 1 << std::endl;
+			continue;
+		}
+		if (localGrid.getCellXZ(x, z + 1).getStatus() == 0) { // south block
+			movements[i].second -= 1;
+			//std::cout << "Block at" << x << ", " << z + 1 << std::endl;
+			continue;
+		}
+		if (localGrid.getCellXZ(x + 1, z).getStatus() == 0) { // east block
+			movements[i].first -= 1;
+			//std::cout << "Block at" << x + 1 << ", " << z << std::endl;
+			continue;
+		}
+		if (localGrid.getCellXZ(x - 1, z).getStatus() == 0) { // west block
+			movements[i].first += 1;
+			//std::cout << "Block at" << x - 1 << ", " << z << std::endl;
+			continue;
+		}
+		if (localGrid.getCellXZ(x - 1, z - 1).getStatus() == 0) { // north west block
+			movements[i].first += 1;
+			movements[i].second += 1;
+			//std::cout << "Block at" << x - 1 << ", " << z - 1 << std::endl;
+			continue;
+		}
+		if (localGrid.getCellXZ(x + 1, z - 1).getStatus() == 0) { // north east block
+			movements[i].first -= 1;
+			movements[i].second += 1;
+			//std::cout << "Block at" << x + 1 << ", " << z - 1 << std::endl;
+			continue;
+		}
+		if (localGrid.getCellXZ(x - 1, z + 1).getStatus() == 0) { // south west block
+			movements[i].first += 1;
+			movements[i].second -= 1;
+			//std::cout << "Block at" << x - 1 << ", " << z + 1 << std::endl;
+			continue;
+		}
+		if (localGrid.getCellXZ(x + 1, z + 1).getStatus() == 0) { // south east block
+			movements[i].first -= 1;
+			movements[i].second -= 1;
+			//std::cout << "Block at" << x + 1 << ", " << z + 1 << std::endl;
+			continue;
+		}
+	}
+	
+}
+
+void TankAI::printMovements() {
+	for (size_t i = 0; i < movements.size(); i++) {
+		std::cout << movements[i].first << ", " << movements[i].second << std::endl;
+	}
+}
+
+std::vector<std::pair<int, int>> TankAI::getMovements() {
+	return movements;
 }
 
 Grid TankAI::getGrid() {
 	return localGrid;
 }
 
-void TankAI::move(glm::vec3& position, glm::vec3& rotation, glm::vec3& camPosition, glm::vec3 dest) {
+void TankAI::move(std::vector<std::pair<int, int>> moves, int &move, glm::vec3& position, glm::vec3& camPosition, glm::vec3& rotation) {
 
-	// will have to round down positions for the tank to move point-to-point
+	if (move == moves.size()) {
+		return;
+	}
 
-	int curX = round(position.x);
-	int curZ = round(position.z);
-	//position.x = curX, position.z = curZ;
+	float moveScale = 0.01f;
+	int x = movements[move].first;
+	int z = movements[move].second;
 
-	int destX = round(dest.x);
-	int destZ = round(dest.z);
-
-	// saving all possible roations of the tank, tank is defaulted at 270* rotation
-
-	glm::vec3 north_west_r = glm::vec3(0.0f, 315.0f, 0.0f);
-	glm::vec3 north_east_r = glm::vec3(0.0f, 225.0f, 0.0f);
-
-	glm::vec3 south_west_r = glm::vec3(0.0f, 45.0f, 0.0f); 
-	glm::vec3 south_east_r = glm::vec3(0.0f, 135.0f, 0.0f);
-
+	// store rotations when moving
 	glm::vec3 north_r = glm::vec3(0.0f, 270.0f, 0.0f);
 	glm::vec3 south_r = glm::vec3(0.0f, 90.0f, 0.0f);
 
 	glm::vec3 west_r = glm::vec3(0.0f, 0.0f, 0.0f);
 	glm::vec3 east_r = glm::vec3(0.0f, 180.0f, 0.0f);
-	
-	// check distance between position and dest points to see which direction it would go
 
-	bool north_west = (position.x - 1 == dest.x && position.z - 1 == dest.z);
-	bool north_east = (position.x + 1 == dest.x && position.z - 1 == dest.z);
+	glm::vec3 north_west_r = glm::vec3(0.0f, 315.0f, 0.0f);
+	glm::vec3 north_east_r = glm::vec3(0.0f, 225.0f, 0.0f);
 
-	bool south_west = (position.x - 1 == dest.x && position.z + 1 == dest.z);
-	bool south_east = (position.x + 1 == dest.x && position.z + 1 == dest.z);
+	glm::vec3 south_west_r = glm::vec3(0.0f, 45.0f, 0.0f);
+	glm::vec3 south_east_r = glm::vec3(0.0f, 135.0f, 0.0f);
 
-	bool north = (position.x == dest.x && position.z - 1 == dest.z);
-	bool south = (position.x == dest.x && position.z + 1 == dest.z);
+	bool xAbsEqual = fabs(position.x - movements[move].first) <= 0.01;
+	bool zAbsEqual = fabs(position.z - movements[move].second) <= 0.01;
 
-	bool east = (position.x + 1 == dest.x && position.z == dest.z);
-	bool west = (position.x - 1 == dest.x && position.z == dest.z);
-
-	// checking each of the 8 directions from the current cell 
-	// note: once the algo properly works, occurances of camPosition can be removed
-
-	float inc = 0.1f;
-
-	if (north_west) {
-		rotation = north_west_r;
-		for (float i = position.x, j = position.z; i >= dest.x && j >= dest.z; i += 0.1f, j -= 0.1f) {
-			position.x -= inc;
-			camPosition.x += inc;
-
-			position.z -= inc;
-			camPosition.z += inc;
-		}
-
-	}
-
-	if (north_east) {
-		rotation = north_east_r;
-		for (float i = position.x, j = position.z; i <= dest.x && j >= dest.z; i += 0.1f, j -= 0.1f) {
-			position.x += inc;
-			camPosition.x -= inc;
-
-			position.z -= inc;
-			camPosition.z += inc;
-		}
-		
-	}
-
-	if (south_west) {
-		rotation = south_west_r;
-		for (float i = position.x, j = position.z; i >= dest.x && j <= dest.z; i -= 0.1f, j += 0.1f) {
-			position.x -= inc;
-			camPosition.x += inc;
-
-			position.z += inc;
-			camPosition.z -= inc;
-		}
-
-	}
-
-	if (south_east) {
-		rotation = south_east_r;
-		for (float i = position.x, j = position.z; i <= dest.x && j <= dest.z; i += 0.1f, j += 0.1f) {
-			position.x += inc;
-			camPosition.x -= inc;
-
-			position.z += inc;
-			camPosition.z -= inc;
-		}
-
-	}
-
-	if (north) {
-		rotation = north_r;
-		for (float i = position.z; i >= dest.z; i -= 0.1f) {
-			position.z -= inc;
-			camPosition.z += inc;
-		}
-
-	}
-
-	if (south) {
+	if (position.z < movements[move].second) { // south
 		rotation = south_r;
-		for (float i = position.z; i <= dest.z; i += 0.1f) {
-			position.z += inc;
-			camPosition.z -= inc;
-		}
-
+		position.z += moveScale;
+		camPosition.z -= moveScale;
 	}
-
-	if (west) {
-		rotation = west_r;
-		for (float i = position.x; i >= dest.x; i -= 0.1f) {
-			position.x -= inc;
-			camPosition.x += inc;
-		}
-
+	if (position.z > movements[move].second) { // north
+		rotation = north_r;
+		position.z -= moveScale;
+		camPosition.z += moveScale;
 	}
-
-	if (east) {
+	if (position.x < movements[move].first) { // east
 		rotation = east_r;
-		for (float i = position.x; i <= dest.x; i += 0.1f) {
-			position.x += inc;
-			camPosition.x -= inc;
-		}
-
+		position.x += moveScale;
+		camPosition.x -= moveScale;
+	}
+	if (position.x > movements[move].first) { // west
+		rotation = west_r;
+		position.x -= moveScale;
+		camPosition.x += moveScale;
+	}
+	if (position.x < movements[move].first && position.z < movements[move].second) { // south east
+		rotation = south_east_r;
+		position.x += moveScale;
+		position.z += moveScale;
+		camPosition.x -= moveScale;
+		camPosition.z -= moveScale;
+	}
+	if (position.x < movements[move].first && position.z > movements[move].second) { // north east
+		rotation = north_east_r;
+		position.x += moveScale;
+		position.z -= moveScale;
+		camPosition.x -= moveScale;
+		camPosition.z += moveScale;
+	}
+	if (position.x > movements[move].first && position.z > movements[move].second) { // north west
+		rotation = north_west_r;
+		position.x -= moveScale;
+		position.z -= moveScale;
+		camPosition.x += moveScale;
+		camPosition.z += moveScale;
+	}
+	if (position.x > movements[move].first && position.z < movements[move].second) { // south west
+		rotation = south_west_r;
+		position.x -= moveScale;
+		position.z += moveScale;
+		camPosition.x += moveScale;
+		camPosition.z -= moveScale;
+	}
+	if (xAbsEqual && zAbsEqual && move < (int) moves.size()) {
+		position.x = (float) x;
+		position.z = (float) z;
+		move++;
 	}
 
+	//std::cout << position.x << ", " << position.z << std::endl;
 }
 
-void TankAI::performSearch(glm::vec3& position, glm::vec3& rotation, glm::vec3& camPosition, glm::vec3 src, glm::vec3 dest) {
+void TankAI::performSearch(glm::vec3& position, glm::vec3& rotation, glm::vec3 src, glm::vec3 dest) {
 
 	// referencing to positions
 	int srcX = round(src.x);
@@ -306,37 +326,324 @@ void TankAI::performSearch(glm::vec3& position, glm::vec3& rotation, glm::vec3& 
 		j = p.second.second;
 		closedList[i][j] = true;
 
-		for (int z = -1; z <= 1; z++) {
-			for (int x = -1; x <= 1; x++) {
-				double gNew, hNew, fNew;
-				
-				// process this cell if its valid
-				if (isValid(z + i, x + j) == true) {
-					// if the destination cell is the same as its current successor
-					if (isDestination(z + i, x + j, destCell) == true) {
-						// set parent of the destination cell
-						cellDetails[z + i][x + j].parent_i = i;
-						cellDetails[z + i][x + j].parent_j = j;
-						tracePath(cellDetails, position, rotation, camPosition, destCell);
-						foundDest = true;
-						return;
-					}
-					else if (closedList[z + i][x + j] == false && isUnblocked(z + i, x + j)) {
-						gNew = cellDetails[i][j].g + 1.0;
-						hNew = calculateHValue(z + i, x + j, destCell);
-						fNew = gNew + hNew;
-					}
-				} 
+		double gNew, hNew, fNew;
+
+		// NORTH DIRECTION
+
+		if (isValid(i - 1, j) == true)
+		{
+
+			if (isDestination(i - 1, j, destCell) == true)
+			{
+
+				cellDetails[i - 1][j].parent_i = i;
+				cellDetails[i - 1][j].parent_j = j;
+				std::cout << "The destination cell is found" << std::endl;
+				tracePath(cellDetails, position, rotation, destCell);
+				foundDest = true;
+				return;
+			}
+
+			else if (closedList[i - 1][j] == false &&
+				isUnblocked(i - 1, j) == true)
+			{
+				gNew = cellDetails[i][j].g + 1.0;
+				hNew = calculateHValue(i - 1, j, destCell);
+				fNew = gNew + hNew;
+
+
+				if (cellDetails[i - 1][j].f == FLT_MAX ||
+					cellDetails[i - 1][j].f > fNew)
+				{
+					openList.insert(std::make_pair(fNew,
+						std::make_pair(i - 1, j)));
+
+					cellDetails[i - 1][j].f = fNew;
+					cellDetails[i - 1][j].g = gNew;
+					cellDetails[i - 1][j].h = hNew;
+					cellDetails[i - 1][j].parent_i = i;
+					cellDetails[i - 1][j].parent_j = j;
+				}
 			}
 		}
+
+		// SOUTH DIRECTION
+
+		if (isValid(i + 1, j) == true)
+		{
+
+			if (isDestination(i + 1, j, destCell) == true)
+			{
+
+				cellDetails[i + 1][j].parent_i = i;
+				cellDetails[i + 1][j].parent_j = j;
+				std::cout << "The destination cell is found" << std::endl;
+				tracePath(cellDetails, position, rotation, destCell);
+				foundDest = true;
+				return;
+			}
+
+			else if (closedList[i + 1][j] == false &&
+				isUnblocked(i + 1, j) == true)
+			{
+				gNew = cellDetails[i][j].g + 1.0;
+				hNew = calculateHValue(i + 1, j, destCell);
+				fNew = gNew + hNew;
+
+
+				if (cellDetails[i + 1][j].f == FLT_MAX ||
+					cellDetails[i + 1][j].f > fNew)
+				{
+					openList.insert(std::make_pair(fNew,
+						std::make_pair(i + 1, j)));
+
+					cellDetails[i + 1][j].f = fNew;
+					cellDetails[i + 1][j].g = gNew;
+					cellDetails[i + 1][j].h = hNew;
+					cellDetails[i + 1][j].parent_i = i;
+					cellDetails[i + 1][j].parent_j = j;
+				}
+			}
+		}
+
+		// EAST DIRECTION
+
+		if (isValid(i, j + 1) == true)
+		{
+
+			if (isDestination(i, j + 1, destCell) == true)
+			{
+
+				cellDetails[i][j + 1].parent_i = i;
+				cellDetails[i][j + 1].parent_j = j;
+				std::cout << "The destination cell is found" << std::endl;
+				tracePath(cellDetails, position, rotation, destCell);
+				foundDest = true;
+				return;
+			}
+
+			else if (closedList[i][j + 1] == false &&
+				isUnblocked(i, j + 1) == true)
+			{
+				gNew = cellDetails[i][j].g + 1.0;
+				hNew = calculateHValue(i, j + 1, destCell);
+				fNew = gNew + hNew;
+
+
+				if (cellDetails[i][j + 1].f == FLT_MAX ||
+					cellDetails[i][j + 1].f > fNew)
+				{
+					openList.insert(std::make_pair(fNew,
+						std::make_pair(i, j + 1)));
+
+					cellDetails[i][j + 1].f = fNew;
+					cellDetails[i][j + 1].g = gNew;
+					cellDetails[i][j + 1].h = hNew;
+					cellDetails[i][j + 1].parent_i = i;
+					cellDetails[i][j + 1].parent_j = j;
+				}
+			}
+		}
+
+		// WEST DIRECTION
+
+		if (isValid(i, j - 1) == true)
+		{
+
+			if (isDestination(i, j - 1, destCell) == true)
+			{
+
+				cellDetails[i][j - 1].parent_i = i;
+				cellDetails[i][j - 1].parent_j = j;
+				std::cout << "The destination cell is found" << std::endl;
+				tracePath(cellDetails, position, rotation, destCell);
+				foundDest = true;
+				return;
+			}
+
+			else if (closedList[i][j - 1] == false &&
+				isUnblocked(i, j - 1) == true)
+			{
+				gNew = cellDetails[i][j].g + 1.0;
+				hNew = calculateHValue(i, j - 1, destCell);
+				fNew = gNew + hNew;
+
+
+				if (cellDetails[i][j - 1].f == FLT_MAX ||
+					cellDetails[i][j - 1].f > fNew)
+				{
+					openList.insert(std::make_pair(fNew,
+						std::make_pair(i, j - 1)));
+
+					cellDetails[i][j - 1].f = fNew;
+					cellDetails[i][j - 1].g = gNew;
+					cellDetails[i][j - 1].h = hNew;
+					cellDetails[i][j - 1].parent_i = i;
+					cellDetails[i][j - 1].parent_j = j;
+				}
+			}
+		}
+
+		// NORTH EAST DIRECTION
+
+		if (isValid(i - 1, j + 1) == true)
+		{
+
+			if (isDestination(i - 1, j + 1, destCell) == true)
+			{
+
+				cellDetails[i - 1][j + 1].parent_i = i;
+				cellDetails[i - 1][j + 1].parent_j = j;
+				std::cout << "The destination cell is found" << std::endl;
+				tracePath(cellDetails, position, rotation, destCell);
+				foundDest = true;
+				return;
+			}
+
+			else if (closedList[i - 1][j + 1] == false &&
+				isUnblocked(i - 1, j + 1) == true)
+			{
+				gNew = cellDetails[i][j].g + 1.0;
+				hNew = calculateHValue(i - 1, j + 1, destCell);
+				fNew = gNew + hNew;
+
+
+				if (cellDetails[i - 1][j + 1].f == FLT_MAX ||
+					cellDetails[i - 1][j + 1].f > fNew)
+				{
+					openList.insert(std::make_pair(fNew,
+						std::make_pair(i - 1, j + 1)));
+
+					cellDetails[i - 1][j + 1].f = fNew;
+					cellDetails[i - 1][j + 1].g = gNew;
+					cellDetails[i - 1][j + 1].h = hNew;
+					cellDetails[i - 1][j + 1].parent_i = i;
+					cellDetails[i - 1][j + 1].parent_j = j;
+				}
+			}
+		}
+
+		// NORTH WEST DIRECTION
+
+		if (isValid(i - 1, j - 1) == true)
+		{
+
+			if (isDestination(i - 1, j - 1, destCell) == true)
+			{
+
+				cellDetails[i - 1][j - 1].parent_i = i;
+				cellDetails[i - 1][j - 1].parent_j = j;
+				std::cout << "The destination cell is found" << std::endl;
+				tracePath(cellDetails, position, rotation, destCell);
+				foundDest = true;
+				return;
+			}
+
+			else if (closedList[i - 1][j - 1] == false &&
+				isUnblocked(i - 1, j - 1) == true)
+			{
+				gNew = cellDetails[i][j].g + 1.0;
+				hNew = calculateHValue(i - 1, j - 1, destCell);
+				fNew = gNew + hNew;
+
+
+				if (cellDetails[i - 1][j - 1].f == FLT_MAX ||
+					cellDetails[i - 1][j - 1].f > fNew)
+				{
+					openList.insert(std::make_pair(fNew,
+						std::make_pair(i - 1, j - 1)));
+
+					cellDetails[i - 1][j - 1].f = fNew;
+					cellDetails[i - 1][j - 1].g = gNew;
+					cellDetails[i - 1][j - 1].h = hNew;
+					cellDetails[i - 1][j - 1].parent_i = i;
+					cellDetails[i - 1][j - 1].parent_j = j;
+				}
+			}
+		}
+
+		// SOUTH EAST DIRECTION
+
+		if (isValid(i + 1, j + 1) == true)
+		{
+
+			if (isDestination(i + 1, j + 1, destCell) == true)
+			{
+
+				cellDetails[i + 1][j + 1].parent_i = i;
+				cellDetails[i + 1][j + 1].parent_j = j;
+				std::cout << "The destination cell is found" << std::endl;
+				tracePath(cellDetails, position, rotation, destCell);
+				foundDest = true;
+				return;
+			}
+
+			else if (closedList[i + 1][j + 1] == false &&
+				isUnblocked(i + 1, j + 1) == true)
+			{
+				gNew = cellDetails[i][j].g + 1.0;
+				hNew = calculateHValue(i + 1, j + 1, destCell);
+				fNew = gNew + hNew;
+
+
+				if (cellDetails[i + 1][j + 1].f == FLT_MAX ||
+					cellDetails[i + 1][j + 1].f > fNew)
+				{
+					openList.insert(std::make_pair(fNew,
+						std::make_pair(i + 1, j + 1)));
+
+					cellDetails[i + 1][j + 1].f = fNew;
+					cellDetails[i + 1][j + 1].g = gNew;
+					cellDetails[i + 1][j + 1].h = hNew;
+					cellDetails[i + 1][j + 1].parent_i = i;
+					cellDetails[i + 1][j + 1].parent_j = j;
+				}
+			}
+		}
+
+		// SOUTH WEST DIRECTION
+
+		if (isValid(i + 1, j - 1) == true)
+		{
+
+			if (isDestination(i + 1, j - 1, destCell) == true)
+			{
+
+				cellDetails[i + 1][j - 1].parent_i = i;
+				cellDetails[i + 1][j - 1].parent_j = j;
+				std::cout << "The destination cell is found" << std::endl;
+				tracePath(cellDetails, position, rotation, destCell);
+				foundDest = true;
+				return;
+			}
+
+			else if (closedList[i + 1][j - 1] == false &&
+				isUnblocked(i + 1, j - 1) == true)
+			{
+				gNew = cellDetails[i][j].g + 1.0;
+				hNew = calculateHValue(i + 1, j - 1, destCell);
+				fNew = gNew + hNew;
+
+
+				if (cellDetails[i + 1][j - 1].f == FLT_MAX ||
+					cellDetails[i + 1][j - 1].f > fNew)
+				{
+					openList.insert(std::make_pair(fNew,
+						std::make_pair(i + 1, j - 1)));
+
+					cellDetails[i + 1][j - 1].f = fNew;
+					cellDetails[i + 1][j - 1].g = gNew;
+					cellDetails[i + 1][j - 1].h = hNew;
+					cellDetails[i + 1][j - 1].parent_i = i;
+					cellDetails[i + 1][j - 1].parent_j = j;
+				}
+			}
+		}
+
 	}
 
-	// check forward (north) direction
-	// check backward (south) direction
-	// check right (east) direction
-	// check left (west) direction
-	// check top-left (north-west) direction
-	// check top-right (north-east) direction
-	// check bottom-left (south-west) direction
-	// check bottom-right (south-east) direction
+	if (foundDest == false) {
+		std::cout << "failed to find the destination cell" << std::endl;
+	}
+	return;
 }

@@ -15,6 +15,8 @@ private:
 	// shorthand for this 2d vector
 	typedef std::vector<std::vector<CellDetails>> cells;
 
+	std::vector<Pair> movements; // to store the movements
+
 	Grid localGrid;
 
 	bool isValid(int row, int col); // check if this cell is is a valid cell 
@@ -23,7 +25,7 @@ private:
 	double calculateHValue(int row, int col, GridCell dest); // calculate the h value for Euclidian distance
 
 	void tracePath(cells cellDetails, glm::vec3& position,
-		glm::vec3& rotation, glm::vec3& camPosition, GridCell dest); // trace the path from the source to destination
+		glm::vec3& rotation, GridCell dest); // trace the path from the source to destination
 
 public:
 
@@ -33,13 +35,15 @@ public:
 	Grid getGrid();
 	int round(float f); // to help with rounding floats
 
-	// move to the next "cell" based on difference between position and dest
-	void move(glm::vec3& position, glm::vec3& rotation, glm::vec3& camPosition, glm::vec3 dest);
+	void adjustMovements();
+	void printMovements();
+	std::vector<Pair> getMovements();
 
-	
+	// iterate through the moves in the vector from point to point
+	void move(std::vector<Pair> moves, int &move, glm::vec3& position, glm::vec3& camPosition, glm::vec3& rotation);
 
 	// perform the search, will have to do this in a thread because loops
-	void performSearch(glm::vec3& position, glm::vec3& rotation, glm::vec3& camPosition, glm::vec3 src, glm::vec3 dest);
+	void performSearch(glm::vec3& position, glm::vec3& rotation, glm::vec3 src, glm::vec3 dest);
 
 };
 
