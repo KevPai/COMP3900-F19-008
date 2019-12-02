@@ -296,12 +296,21 @@ void mainThread()
 		client.sendMessage(_strdup(lmessage));
 	}
 
-	// AI IS HERE
-	// rows and cols in params can be changed later
-	//TankAI tankAI(31, 31, cubeSize);
-	//glm::vec3 src = glm::vec3(0.0f, 0.0f, 0.0f);
-	//glm::vec3 dest = glm::vec3(4.0f, 0.0f, -6.0f);
-	//tankAI.performSearch(position, rotation, camPosition, src, dest);
+	// Src and dest may be changed to different position in the area
+	TankAI tankAI(31, 31, cubeSize);
+	glm::vec3 src = glm::vec3(0.0f, 0.0f, 0.0f); // Based on the position of the tank
+	glm::vec3 dest = glm::vec3(4.0f, 0.0f, -6.0f);
+	
+	tankAI.performSearch(position, rotation, src, dest);
+	int move = 1;
+
+	// Adjust movements to create offset from cubes so tank doesn't get stuck
+	cout << "Offsetting path..." << endl;
+	tankAI.adjustMovements();
+	tankAI.printMovements();
+
+	// Get the movements
+	vector<pair<int, int>> movements = tankAI.getMovements();
 
 	//Configure shaders
 	myShader.Use();
@@ -494,22 +503,9 @@ void mainThread()
 			ourModel.Draw(myShader);
 		}
 
-		// DO AI STUFF HERE
-
-		glm::vec3 src = glm::vec3(0.0f, 0.0f, 0.0f);
-		glm::vec3 dest = glm::vec3(4.0f, 0.0f, -6.0f);
-
-		glm::vec3 NW = glm::vec3(-1.0f, 0.0f, -1.0f);
-		glm::vec3 NE = glm::vec3(1.0f, 0.0f, -1.0f);
-		glm::vec3 SW = glm::vec3(-1.0f, 0.0f, 1.0f);
-		glm::vec3 SE = glm::vec3(1.0f, 0.0f, 1.0f);
-		glm::vec3 N = glm::vec3(0.0f, 0.0f, -1.0f);
-		glm::vec3 S = glm::vec3(0.0f, 0.0f, 1.0f);
-		glm::vec3 W = glm::vec3(-1.0f, 0.0f, 0.0f);
-		glm::vec3 E = glm::vec3(1.0f, 0.0f, 0.0f);
-		//tankAI.move(position, rotation, camPosition, NW);
-		//tankAI.performSearch(position, rotation, camPosition, src, dest);
-		//cout << position.x << "," << position.z << endl;
+		// Iterate through movements to move the AI controlled tank until it reaches final movement
+		// This is disabled because this functionality was not integrated
+		//tankAI.move(movements, move, position, rotation);
 		
 		ImGui::Render();
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
