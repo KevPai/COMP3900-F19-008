@@ -2,6 +2,7 @@
 #include <conio.h>
 
 Client::Client() {
+	//responsible for starting up winsock
 	version = MAKEWORD(2, 2);
 	int wsOK = WSAStartup(version, &data);
 	isClientRunning = true;
@@ -13,27 +14,27 @@ Client::~Client() {
 }
 
 void Client::createClient() {
+	//marks the client as a client and not a server
 	isServer = false;
+
+	//creates the profile for the client output
 	out = socket(AF_INET, SOCK_DGRAM, 0);
-	//serverHint.sin_addr.S_un.S_addr = htonl(INADDR_ANY);
 	serverHint.sin_family = AF_INET;
 	serverHint.sin_port = htons(5000);
-	inet_pton(AF_INET, "142.232.159.144", &serverHint.sin_addr);
+	//hardcoded ip to connect
+	inet_pton(AF_INET, "192.168.1.75", &serverHint.sin_addr);
 	
-	/*if (bind(out, (sockaddr*)&serverHint, sizeof(serverHint)) == SOCKET_ERROR) {
-		cout << "error " << WSAGetLastError() << endl;
-	}*/
 	ser_length = sizeof(server);
 	ZeroMemory(&server, ser_length);
 }
 
 void Client::createServer() {
-	//creates a socket and sets it to UDP
 	isServer = true;
+	//creates a socket and sets it to UDP
 	in = socket(AF_INET, SOCK_DGRAM, 0);
-	serverHint.sin_addr.S_un.S_addr = htonl(INADDR_ANY); //give me any addres, whatever the ip of the card
+	serverHint.sin_addr.S_un.S_addr = htonl(INADDR_ANY);  //gives me the addres, whatever the ip of the card
 	serverHint.sin_family = AF_INET;
-	serverHint.sin_port = htons(5000);
+	serverHint.sin_port = htons(5000); //sets the port to 5000
 	if (bind(in, (sockaddr*)& serverHint, sizeof(serverHint)) == SOCKET_ERROR) //binds the socket to a port
 	{
 		cout << "Cant bind socket! " << WSAGetLastError() << endl;
@@ -46,6 +47,7 @@ void Client::createServer() {
 
 
 string Client::updateReceive() {
+	//sets the socket to non blocking
 	setsockopt(in, SOL_SOCKET, SO_RCVTIMEO, buf, BUFFSIZE);
 		if (isServer) 
 		{
@@ -56,7 +58,7 @@ string Client::updateReceive() {
 				cout << "error receiving from client" << endl;
 			};
 
-			//checks if client is in the client list
+			//checks if client is in the client list, if so it doesn't add it to the client list
 			int match = 0;
 			for (int i = 0; i < clients.size(); i++)
 			{
@@ -94,13 +96,10 @@ string Client::updatePos() {
 	if (isServer) 
 	{
 		string s;
-		//setsockopt(in, SOL_SOCKET, SO_RCVTIMEO, buf, BUFFSIZE);
 		ZeroMemory(buf, BUFFSIZE);
 		if ((bytesIn = recvfrom(in, buf, BUFFSIZE, 0, (sockaddr*)& client, &clientLength)) == ERROR) {
 			perror("rip");
 		}
-
-		//cout << bytesIn << " " << WSAGetLastError() << endl;
 
 		//checks if client is in the client list
 		int match = 0;
@@ -172,12 +171,13 @@ bool Client::isserver()
 
 
 
-
+//server sending to a specific client
 void Client::BroadcastMessage(string message, sockaddr_in dest) {
 	clientLength = sizeof(dest);
 	sendto(in, message.c_str(), 1024, 0, (sockaddr*)& dest, clientLength);
 }
 
+//server sending message to all client
 void Client::BroadCastMessageToAll(string message) {
 	for (int i = 0; i < clients.size(); i++) {
 		BroadcastMessage(message, clients[i]);
@@ -185,15 +185,16 @@ void Client::BroadCastMessageToAll(string message) {
 }
 
 bool Client::CompareClients(sockaddr_in c1, sockaddr_in c2) {
-
 	return (c1.sin_addr.s_addr == c2.sin_addr.s_addr);
 }
 
+//client sending message to server
 void Client::sendMessage(string message) {
 	int n;
 	n = sendto(out, message.c_str(), BUFFSIZE, 0, (sockaddr*)&serverHint, sizeof(serverHint));
 }
 
+//closes the client and cleans up the winsock, if server also closes the socket
 void Client::closeClient() {
 	if (isServer) 
 	{
