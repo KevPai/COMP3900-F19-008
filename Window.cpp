@@ -26,6 +26,7 @@
 //chat vector
 ImVector<char*> chat;
 
+//vectors for model, position, rotation
 vector<glm::mat4> playerModel;
 vector<int> playerId;
 vector<glm::vec3> playerPosition;
@@ -59,12 +60,16 @@ glm::vec3 camPosition = glm::vec3(0.0f);
 Camera camera(position);
 
 void readFunc() {
-	//myserver.UpdateRecv();
 	glm::vec3 playerPos(0.0f);
 	glm::vec3 playerRot(0.0f, 90.0f, 0.0f);
+	//while the client is running the server will continue to listen to messages
 	while (client.isClientRunning) {
-		cout << playerNumber << endl;
+
+		//variables for handling messages
 		char message[256];
+
+		//actual packet received from either client or server
+
 		string update = client.updatePos();
 		stringstream ss(update);
 		string encode;
@@ -75,9 +80,11 @@ void readFunc() {
 		char* s;
 		int code = 0;
 		ss >> code;
-		if (!update.empty()) {
-			//cout << "recieved a message" << endl;
+		if (!update.empty()) //checks if the packet is empty
+		{
+
 			switch (code) {
+
 			case 0: //login message
 				encode = update.substr(update.find(" ") + 1);
 				memset(message, 0, sizeof(message));
@@ -87,7 +94,8 @@ void readFunc() {
 				chat.push_back(_strdup(s));
 
 				if (client.isserver()) {
-					//add new player information
+
+					//add new player information to server
 					cout << "spawning new player" << endl;
 					playerCount++;
 					playerId.push_back(playerCount);
@@ -95,11 +103,13 @@ void readFunc() {
 					playerRotation.push_back(playerRot);
 					glm::mat4 tank;
 					playerModel.push_back(tank);
-					//assign player information to stuff
+					//assign player information
 					oss << 3 << " " << playerCount;
 					cout << oss.str() << endl;
-					client.BroadCastMessageToAll(oss.str());
-					for (int i = 0; i < playerId.size(); i++) {
+					client.BroadCastMessageToAll(oss.str()); //send new player information to other clients and spawn in player
+
+					for (int i = 0; i < playerId.size(); i++) //new player is sent information on itself and the current players in the game
+					{
 						oss.str("");
 						oss << 4 << " " << playerId[i] << " " << playerPosition[i].x << " " << playerPosition[i].y << " " << playerPosition[i].z
 							<< " " << playerRotation[i].x << " " << playerRotation[i].y << " " << playerRotation[i].z;
@@ -107,7 +117,7 @@ void readFunc() {
 					}
 				}
 				break;
-			case 1: //message
+			case 1: //messages for chat
 				encode = update.substr(update.find(" ") + 1);
 				memset(message, 0, sizeof(message));
 				strcpy_s(message, encode.c_str());
@@ -115,12 +125,14 @@ void readFunc() {
 				s = message;
 				chat.push_back(_strdup(s));
 				break;
+
 			case 3: //sent player info |3|PlayerNumber|
 				encode = update.substr(update.find(" ") + 1);
 				if (playerNumber == NULL) {
 					playerNumber = stoi(encode);
 				}
 				break;
+
 			case 4: //initialize positions in clients
 				encode = update.substr(update.find(" " + 1));
 				ss.str("");
@@ -284,12 +296,21 @@ void mainThread()
 		client.sendMessage(_strdup(lmessage));
 	}
 
-	// AI IS HERE
-	// rows and cols in params can be changed later
-	//TankAI tankAI(31, 31, cubeSize);
-	//glm::vec3 src = glm::vec3(0.0f, 0.0f, 0.0f);
-	//glm::vec3 dest = glm::vec3(4.0f, 0.0f, -6.0f);
-	//tankAI.performSearch(position, rotation, camPosition, src, dest);
+	// Src and dest may be changed to different position in the area
+	TankAI tankAI(31, 31, cubeSize);
+	glm::vec3 src = glm::vec3(0.0f, 0.0f, 0.0f); // Based on the position of the tank
+	glm::vec3 dest = glm::vec3(4.0f, 0.0f, -6.0f);
+	
+	tankAI.performSearch(position, rotation, src, dest);
+	int move = 1;
+
+	// Adjust movements to create offset from cubes so tank doesn't get stuck
+	cout << "Offsetting path..." << endl;
+	tankAI.adjustMovements();
+	tankAI.printMovements();
+
+	// Get the movements
+	vector<pair<int, int>> movements = tankAI.getMovements();
 
 	//Configure shaders
 	myShader.Use();
@@ -317,7 +338,7 @@ void mainThread()
 			ImGui::Begin("HUD", NULL, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse);
 			ImGui::SetWindowPos(ImVec2(0.0, 600), 1);
 			ImVec2 x = ImVec2(-100.0, 50.0), y = ImVec2(20.0, 20.0);
-			ImGui::Text("Insert Username Here");
+			ImGui::Text(username);
 			ImGui::PushStyleColor(ImGuiCol_PlotHistogram, (ImVec4)ImColor::HSV(7.0f, 0.6f, 0.6f));
 			ImGui::ProgressBar(1.0, x, NULL);
 			ImGui::PopStyleColor();
@@ -356,9 +377,10 @@ void mainThread()
 			ImGui::End();
 		}
 
-		tempPos = playerPosition[playerNumber];
-		tempRot = playerRotation[playerNumber];
-
+		if (playerPosition.size() != 0 && playerRotation.size() != 0) {
+			tempPos = playerPosition[playerNumber];
+			tempRot = playerRotation[playerNumber];
+		}
 		// Checks inputs
 		processInput(window, playerPosition[playerNumber], playerRotation[playerNumber], camPosition);
 
@@ -441,7 +463,7 @@ void mainThread()
 		glBindTexture(GL_TEXTURE_2D, texture[2]);
 
 		// render the loaded model
-		for (int i = 0; i < playerId.size(); i++) {
+		for (int i = 0; i < playerModel.size(); i++) {
 			playerModel[i] = glm::mat4(1.0f);
 		}
 
@@ -470,7 +492,7 @@ void mainThread()
 			}			
 		}
 
-		for (int i = 0; i < playerId.size(); i++) {
+		for (int i = 0; i < playerModel.size(); i++) {
 			//cout << i << endl;
 			playerModel[i] = glm::translate(playerModel[i], glm::vec3(0.0f, -0.4f, 0.0f)); // translate it down so it's at the center of the scene		
 			playerModel[i] = glm::translate(playerModel[i], glm::vec3(playerPosition[i]));
@@ -482,22 +504,9 @@ void mainThread()
 			ourModel.Draw(myShader);
 		}
 
-		// DO AI STUFF HERE
-
-		glm::vec3 src = glm::vec3(0.0f, 0.0f, 0.0f);
-		glm::vec3 dest = glm::vec3(4.0f, 0.0f, -6.0f);
-
-		glm::vec3 NW = glm::vec3(-1.0f, 0.0f, -1.0f);
-		glm::vec3 NE = glm::vec3(1.0f, 0.0f, -1.0f);
-		glm::vec3 SW = glm::vec3(-1.0f, 0.0f, 1.0f);
-		glm::vec3 SE = glm::vec3(1.0f, 0.0f, 1.0f);
-		glm::vec3 N = glm::vec3(0.0f, 0.0f, -1.0f);
-		glm::vec3 S = glm::vec3(0.0f, 0.0f, 1.0f);
-		glm::vec3 W = glm::vec3(-1.0f, 0.0f, 0.0f);
-		glm::vec3 E = glm::vec3(1.0f, 0.0f, 0.0f);
-		//tankAI.move(position, rotation, camPosition, NW);
-		//tankAI.performSearch(position, rotation, camPosition, src, dest);
-		//cout << position.x << "," << position.z << endl;
+		// Iterate through movements to move the AI controlled tank until it reaches final movement
+		// This is disabled because this functionality was not integrated
+		//tankAI.move(movements, move, position, rotation);
 		
 		ImGui::Render();
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
@@ -541,14 +550,17 @@ int main() {
 	std::cin >> message;
 	if (message == "host") {
 		client.createServer();
-		readthread = thread(readFunc);
 		writethread = thread(mainThread);
+		readthread = thread(readFunc);
 	}
 	else if (message == "join")
 	{
-		client.createClient();
-		readthread = thread(readFunc);
+		std::cout << "Enter ip address of host" << endl;
+		string ip;
+		std::cin >> ip;
+		client.createClient(ip);
 		writethread = thread(mainThread);
+		readthread = thread(readFunc);
 	}
 	readthread.join();
 	writethread.join();

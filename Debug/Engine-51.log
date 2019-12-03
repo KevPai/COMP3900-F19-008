@@ -1,0 +1,13 @@
+﻿  Grid.cpp
+  TankAI.cpp
+  Window.cpp
+C:\Users\KPai5\Desktop\Engine-51\Engine-51\AI\TankAI.cpp(13,11): warning C4244:  'return': conversion from 'double' to 'int', possible loss of data
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.18362.0\shared\minwindef.h(130,1): warning C4005:  'APIENTRY': macro redefinition
+C:\Users\KPai5\Desktop\BCIT Archive\OpenGL\Include\glad\glad.h(32): message :  see previous definition of 'APIENTRY'
+C:\Users\KPai5\Desktop\Engine-51\Engine-51\Window.cpp(111,24): warning C4018:  '<': signed/unsigned mismatch
+C:\Users\KPai5\Desktop\Engine-51\Engine-51\Window.cpp(466,21): warning C4018:  '<': signed/unsigned mismatch
+  Generating Code...
+C:\Users\KPai5\Desktop\Engine-51\Engine-51\Window.cpp(495,21): warning C4018:  '<': signed/unsigned mismatch
+  glad.c
+LINK : warning LNK4098: defaultlib 'MSVCRT' conflicts with use of other libs; use /NODEFAULTLIB:library
+  Engine-51.vcxproj -> C:\Users\KPai5\Desktop\Engine-51\Debug\Engine-51.exe
