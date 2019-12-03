@@ -1,7 +1,7 @@
 # COMP3900-F19-008
 3D Game Engine with a tank game
 
-Download repo
+Download repo/n
 Create a new visual studio project with the c++ desktop wizard
 Select console application and checkbox empty project
 Create
