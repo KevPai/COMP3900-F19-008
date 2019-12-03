@@ -13,7 +13,7 @@ Client::Client() {
 Client::~Client() {
 }
 
-void Client::createClient() {
+void Client::createClient(string s) {
 	//marks the client as a client and not a server
 	isServer = false;
 
@@ -22,7 +22,7 @@ void Client::createClient() {
 	serverHint.sin_family = AF_INET;
 	serverHint.sin_port = htons(5000);
 	//hardcoded ip to connect
-	inet_pton(AF_INET, "192.168.1.75", &serverHint.sin_addr);
+	inet_pton(AF_INET, s.c_str(), &serverHint.sin_addr);
 	
 	ser_length = sizeof(server);
 	ZeroMemory(&server, ser_length);

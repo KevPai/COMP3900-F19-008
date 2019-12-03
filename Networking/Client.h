@@ -17,7 +17,7 @@ class Client
 public:
 	Client();
 	~Client();
-	void createClient();
+	void createClient(string s);
 	string updateReceive();
 	string updatePos();
 	void updateSend();

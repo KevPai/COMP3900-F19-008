@@ -377,9 +377,10 @@ void mainThread()
 			ImGui::End();
 		}
 
-		tempPos = playerPosition[playerNumber];
-		tempRot = playerRotation[playerNumber];
-
+		if (playerPosition.size() != 0 && playerRotation.size() != 0) {
+			tempPos = playerPosition[playerNumber];
+			tempRot = playerRotation[playerNumber];
+		}
 		// Checks inputs
 		processInput(window, playerPosition[playerNumber], playerRotation[playerNumber], camPosition);
 
@@ -462,7 +463,7 @@ void mainThread()
 		glBindTexture(GL_TEXTURE_2D, texture[2]);
 
 		// render the loaded model
-		for (int i = 0; i < playerId.size(); i++) {
+		for (int i = 0; i < playerModel.size(); i++) {
 			playerModel[i] = glm::mat4(1.0f);
 		}
 
@@ -491,7 +492,7 @@ void mainThread()
 			}			
 		}
 
-		for (int i = 0; i < playerId.size(); i++) {
+		for (int i = 0; i < playerModel.size(); i++) {
 			//cout << i << endl;
 			playerModel[i] = glm::translate(playerModel[i], glm::vec3(0.0f, -0.4f, 0.0f)); // translate it down so it's at the center of the scene		
 			playerModel[i] = glm::translate(playerModel[i], glm::vec3(playerPosition[i]));
@@ -554,7 +555,10 @@ int main() {
 	}
 	else if (message == "join")
 	{
-		client.createClient();
+		std::cout << "Enter ip address of host" << endl;
+		string ip;
+		std::cin >> ip;
+		client.createClient(ip);
 		writethread = thread(mainThread);
 		readthread = thread(readFunc);
 	}
